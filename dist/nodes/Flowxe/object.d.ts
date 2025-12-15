@@ -6,4 +6,6 @@ export declare const phoneNumber: INodeProperties[];
 export declare const pipeline: INodeProperties[];
 export declare const customField: INodeProperties[];
 export declare const note: INodeProperties[];
+export declare const tag: INodeProperties[];
+export declare const task: INodeProperties[];
 export {};

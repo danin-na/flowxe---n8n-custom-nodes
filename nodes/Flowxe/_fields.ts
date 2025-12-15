@@ -31,7 +31,6 @@ const fl = {
       typeOptions: { password: true },
       description: 'Private Integration Token (Authorization: Bearer ...)',
     } as N),
-    // in fl.global
     outputFormat: forOp({
       displayName: 'Output Format',
       name: 'outputFormat',
@@ -67,6 +66,14 @@ const fl = {
       default: '',
       description: 'Assign this to a user with User ID',
     } as N),
+    title: forOp({
+      displayName: 'Title',
+      name: 'title',
+      type: 'string',
+      default: '',
+      description: 'Assign title to the object',
+    } as N),
+
   },
   contact: {
     id: forOp({
@@ -157,7 +164,7 @@ const fl = {
   tag: {
     tags: forOp({
       displayName: 'Tags',
-      name: 'tags',
+      name: 'tagTags',
       type: 'string',
       default: '',
       required: true,
@@ -172,13 +179,6 @@ const fl = {
       default: '',
       required: true,
       description: 'The ID of the task',
-    } as N),
-    title: forOp({
-      displayName: 'Title',
-      name: 'taskTitle',
-      type: 'string',
-      default: '',
-      description: 'Task title (required for Create)',
     } as N),
     dueDate: forOp({
       displayName: 'Due Date',
@@ -201,6 +201,7 @@ const fl = {
       ],
     } as N),
   },
+
 } as const
 
 const fields = {
@@ -258,6 +259,55 @@ const fields = {
     fl.note.id('note', 'noteDelete'),
     fl.global.outputFormat('note', 'noteDelete'),
   ],
+  tag: [
+    // ----- add
+    fl.global.apiKey('tag', 'tagAdd'),
+    fl.contact.id('tag', 'tagAdd'),
+    fl.tag.tags('tag', 'tagAdd'),
+    fl.global.outputFormat('tag', 'tagAdd'),
+    // ----- remove
+    fl.global.apiKey('tag', 'tagRemove'),
+    fl.contact.id('tag', 'tagRemove'),
+    fl.tag.tags('tag', 'tagRemove'),
+    fl.global.outputFormat('tag', 'tagRemove'),
+  ],
+  task: [
+    // ----- getAll
+    fl.global.apiKey('task', 'taskGetAll'),
+    fl.contact.id('task', 'taskGetAll'),
+    fl.global.outputFormat('task', 'taskGetAll'),
+    // ----- create
+    fl.global.apiKey('task', 'taskCreate'),
+    fl.contact.id('task', 'taskCreate'),
+    fl.global.title('task', 'taskCreate'),
+    fl.global.message('task', 'taskCreate'),
+    fl.task.dueDate('task', 'taskCreate'),
+    fl.task.completed('task', 'taskCreate'),
+    fl.global.userId('task', 'taskCreate'),
+    fl.global.outputFormat('task', 'taskCreate'),
+    // ----- get
+    fl.global.apiKey('task', 'taskGet'),
+    fl.contact.id('task', 'taskGet'),
+    fl.task.id('task', 'taskGet'),
+    fl.global.outputFormat('task', 'taskGet'),
+    // ----- update
+    fl.global.apiKey('task', 'taskUpdate'),
+    fl.contact.id('task', 'taskUpdate'),
+    fl.task.id('task', 'taskUpdate'),
+    fl.global.title('task', 'taskUpdate'),
+    fl.global.message('task', 'taskUpdate'),
+    fl.task.dueDate('task', 'taskUpdate'),
+    fl.task.completed('task', 'taskUpdate'),
+    fl.global.userId('task', 'taskUpdate'),
+    fl.global.outputFormat('task', 'taskUpdate'),
+    // ----- delete
+    fl.global.apiKey('task', 'taskDelete'),
+    fl.contact.id('task', 'taskDelete'),
+    fl.task.id('task', 'taskDelete'),
+    fl.global.outputFormat('task', 'taskDelete'),
+  ],
+
+
 }
 
 export { fields }

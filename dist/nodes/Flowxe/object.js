@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.note = exports.customField = exports.pipeline = exports.phoneNumber = exports.location = exports.resource = void 0;
+exports.task = exports.tag = exports.note = exports.customField = exports.pipeline = exports.phoneNumber = exports.location = exports.resource = void 0;
 const _fields_1 = require("./_fields");
 const _actions_1 = require("./_actions");
 exports.resource = {
@@ -14,6 +14,8 @@ exports.resource = {
         { name: 'Pipeline', value: 'pipeline' },
         { name: 'Custom Field', value: 'customField' },
         { name: 'Note', value: 'note' },
+        { name: 'Tag', value: 'tag' },
+        { name: 'Task', value: 'task' },
     ],
     default: 'location',
 };
@@ -86,5 +88,33 @@ exports.note = [
         ],
     },
     ..._fields_1.fields.note,
+];
+exports.tag = [
+    {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['tag'] } },
+        default: '',
+        options: [
+            ..._actions_1.actions.tag,
+        ],
+    },
+    ..._fields_1.fields.tag,
+];
+exports.task = [
+    {
+        displayName: 'Operation',
+        name: 'operation',
+        type: 'options',
+        noDataExpression: true,
+        displayOptions: { show: { resource: ['task'] } },
+        default: '',
+        options: [
+            ..._actions_1.actions.task,
+        ],
+    },
+    ..._fields_1.fields.task,
 ];
 //# sourceMappingURL=object.js.map

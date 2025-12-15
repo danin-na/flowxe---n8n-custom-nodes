@@ -29,7 +29,7 @@ exports.helpers = {
             get: makeOutput({
                 op: 'locationGet',
                 key: 'location',
-                pre: `const d = body.location ?? body;`,
+                pre: `const d = body.location ?? {}`,
                 full: `({
           id        : d?.id ?? null,
           name      : d?.name ?? null,
@@ -110,7 +110,7 @@ exports.helpers = {
             get: makeOutput({
                 op: 'noteGet',
                 key: 'note',
-                pre: `const d = body.note;`,
+                pre: `const d = body.note ?? {}`,
                 full: `d`,
                 simple: `({
           id        : d?.id ?? null,
@@ -138,7 +138,7 @@ exports.helpers = {
             create: makeOutput({
                 op: 'noteCreate',
                 key: 'note',
-                pre: `const d = body.note;`,
+                pre: `const d = body.note ?? {}`,
                 full: `d`,
                 simple: `({
           id        : d?.id ?? null,
@@ -150,7 +150,7 @@ exports.helpers = {
             update: makeOutput({
                 op: 'noteUpdate',
                 key: 'note',
-                pre: `const d = body.note;`,
+                pre: `const d = body.note ?? {}`,
                 full: `d`,
                 simple: `({
           id        : d?.id ?? null,
@@ -162,6 +162,93 @@ exports.helpers = {
             delete: makeOutput({
                 op: 'noteDelete',
                 key: 'note',
+                pre: ``,
+                full: `body`,
+                simple: `({
+          succeded: body?.succeded ?? null,
+        })`,
+            }),
+        },
+        tag: {
+            add: makeOutput({
+                op: 'tagAdd',
+                key: 'tag',
+                pre: `const list = body.tags ?? [];`,
+                full: `list`,
+                simple: `(Array.isArray(list) ? list : [])`,
+            }),
+            remove: makeOutput({
+                op: 'tagRemove',
+                key: 'tag',
+                pre: `const list = body.tags ?? [];`,
+                full: `list`,
+                simple: `(Array.isArray(list) ? list : [])`,
+            }),
+        },
+        task: {
+            get: makeOutput({
+                op: 'taskGet',
+                key: 'task',
+                pre: `const d = body.task ?? {};`,
+                full: `d`,
+                simple: `({
+          id        : d?.id ?? null,
+          title     : d?.title ?? null,
+          body      : d?.body ?? null,
+          assignedTo: d?.assignedTo ?? null,
+          dueDate   : d?.dueDate ?? null,
+          completed : d?.completed ?? null,
+        })`,
+            }),
+            getAll: makeOutput({
+                op: 'taskGetAll',
+                key: 'task',
+                pre: `const list = body.tasks ?? [];`,
+                full: `list`,
+                simple: `(
+          Array.isArray(list)
+            ? list.map((t) => ({
+                id        : t?.id ?? null,
+                title     : t?.title ?? null,
+                body      : t?.body ?? null,
+                assignedTo: t?.assignedTo ?? null,
+                dueDate   : t?.dueDate ?? null,
+                completed : t?.completed ?? null,
+              }))
+            : list
+        )`,
+            }),
+            create: makeOutput({
+                op: 'taskCreate',
+                key: 'task',
+                pre: `const d = body.task ?? {};`,
+                full: `d`,
+                simple: `({
+          id        : d?.id ?? null,
+          title     : d?.title ?? null,
+          body      : d?.body ?? null,
+          assignedTo: d?.assignedTo ?? null,
+          dueDate   : d?.dueDate ?? null,
+          completed : d?.completed ?? null,
+        })`,
+            }),
+            update: makeOutput({
+                op: 'taskUpdate',
+                key: 'task',
+                pre: `const d = body.task ?? {};`,
+                full: `d`,
+                simple: `({
+          id        : d?.id ?? null,
+          title     : d?.title ?? null,
+          body      : d?.body ?? null,
+          assignedTo: d?.assignedTo ?? null,
+          dueDate   : d?.dueDate ?? null,
+          completed : d?.completed ?? null,
+        })`,
+            }),
+            delete: makeOutput({
+                op: 'taskDelete',
+                key: 'task',
                 pre: ``,
                 full: `body`,
                 simple: `({

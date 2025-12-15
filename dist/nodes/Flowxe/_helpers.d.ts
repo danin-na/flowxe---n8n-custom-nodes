@@ -19,5 +19,16 @@ export declare const helpers: {
             readonly update: string;
             readonly delete: string;
         };
+        readonly tag: {
+            readonly add: string;
+            readonly remove: string;
+        };
+        readonly task: {
+            readonly get: string;
+            readonly getAll: string;
+            readonly create: string;
+            readonly update: string;
+            readonly delete: string;
+        };
     };
 };

@@ -16,6 +16,8 @@ export const resource: N = {
     { name: 'Pipeline', value: 'pipeline' },
     { name: 'Custom Field', value: 'customField' },
     { name: 'Note', value: 'note' },
+    { name: 'Tag', value: 'tag' },
+    { name: 'Task', value: 'task' },
   ],
   default: 'location',
 }
@@ -35,7 +37,6 @@ export const location =
     },
     ...fields.location
   ] satisfies N[]
-
 export const phoneNumber =
   [
     {
@@ -51,7 +52,6 @@ export const phoneNumber =
     },
     ...fields.phoneNumber
   ] satisfies N[]
-
 export const pipeline =
   [
     {
@@ -67,7 +67,6 @@ export const pipeline =
     },
     ...fields.pipeline
   ] satisfies N[]
-
 export const customField =
   [
     {
@@ -83,7 +82,6 @@ export const customField =
     },
     ...fields.customField
   ] satisfies N[]
-
 export const note =
   [
     {
@@ -98,4 +96,34 @@ export const note =
       ],
     },
     ...fields.note,
+  ] satisfies N[]
+export const tag =
+  [
+    {
+      displayName: 'Operation',
+      name: 'operation',
+      type: 'options',
+      noDataExpression: true,
+      displayOptions: { show: { resource: ['tag'] } },
+      default: '',
+      options: [
+        ...actions.tag,
+      ],
+    },
+    ...fields.tag,
+  ] satisfies N[]
+export const task =
+  [
+    {
+      displayName: 'Operation',
+      name: 'operation',
+      type: 'options',
+      noDataExpression: true,
+      displayOptions: { show: { resource: ['task'] } },
+      default: '',
+      options: [
+        ...actions.task,
+      ],
+    },
+    ...fields.task,
   ] satisfies N[]

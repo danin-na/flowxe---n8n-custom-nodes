@@ -32,6 +32,8 @@ export class Flowxe implements INodeType
 			...obj.pipeline,
 			...obj.customField,
 			...obj.note,
+			...obj.tag,
+			...obj.task,
 		],
 	};
 }

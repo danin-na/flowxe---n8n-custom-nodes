@@ -6,5 +6,7 @@ export declare const actions: {
     readonly pipeline: N[];
     readonly customField: N[];
     readonly note: N[];
+    readonly tag: N[];
+    readonly task: N[];
 };
 export {};

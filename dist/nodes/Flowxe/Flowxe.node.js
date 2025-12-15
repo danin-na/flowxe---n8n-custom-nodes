@@ -64,6 +64,8 @@ class Flowxe {
                 ...obj.pipeline,
                 ...obj.customField,
                 ...obj.note,
+                ...obj.tag,
+                ...obj.task,
             ],
         };
     }

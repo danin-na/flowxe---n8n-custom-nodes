@@ -5,5 +5,7 @@ declare const fields: {
     pipeline: INodeProperties[];
     customField: INodeProperties[];
     note: INodeProperties[];
+    tag: INodeProperties[];
+    task: INodeProperties[];
 };
 export { fields };
