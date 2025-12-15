@@ -1,14 +1,14 @@
 {
   "name": "n8n-nodes-custom",
   "version": "0.1.0",
-  "description": "",
+  "description": "Flowxe Custom Nodes N8N",
   "license": "MIT",
   "homepage": "",
   "keywords": ["n8n-community-node-package"],
-  "author": { "name": "", "email": "" },
+  "author": { "name": "danin", "email": "danin@flowxe.dev" },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/danin-na/flowxe---n8n-custom-nodes.git"
   },
   "scripts": {
     "build": "n8n-node build",
