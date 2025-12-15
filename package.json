@@ -24,7 +24,7 @@
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [],
-    "nodes": ["dist/nodes/Custom/Custom.node.js"]
+    "nodes": ["dist/nodes/Flowxe/Flowxe.node.ts"]
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
