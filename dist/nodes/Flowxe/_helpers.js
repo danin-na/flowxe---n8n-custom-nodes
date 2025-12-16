@@ -25,6 +25,70 @@ function makeOutput(spec) {
 }
 exports.helpers = {
     output: {
+        contact: {
+            get: makeOutput({
+                op: 'contactGet',
+                key: 'contact',
+                pre: `const d = body.contact ?? body ?? {};`,
+                full: `d`,
+                simple: `({
+          id: d?.id ?? null,
+          name: d?.name ?? null,
+          firstName: d?.firstName ?? null,
+          lastName: d?.lastName ?? null,
+          email: d?.email ?? null,
+          phone: d?.phone ?? null,
+          website: d?.website ?? null,
+          assignedTo: d?.assignedTo ?? null,
+          dateOfBirth: d?.dateOfBirth ?? null,
+          address: {
+            line1: d?.address1 ?? null,
+            city: d?.city ?? null,
+            state: d?.state ?? null,
+            zipCode: d?.postalCode ?? null,
+            country: d?.country ?? null,
+          },
+          tags: Array.isArray(d?.tags) ? d.tags : [],
+          customFields: Array.isArray(d?.customFields)
+            ? d.customFields.map((f) => ({
+                id: f?.id ?? null,
+                value: f?.value ?? null,
+              }))
+            : []
+        })`,
+            }),
+            update: makeOutput({
+                op: 'contactUpdate',
+                key: 'contact',
+                pre: `const d = body.contact ?? body ?? {};`,
+                full: `d`,
+                simple: `({
+          id: d?.id ?? null,
+          name: d?.name ?? null,
+          firstName: d?.firstName ?? null,
+          lastName: d?.lastName ?? null,
+          email: d?.email ?? null,
+          phone: d?.phone ?? null,
+          website: d?.website ?? null,
+          assignedTo: d?.assignedTo ?? null,
+          dateOfBirth: d?.dateOfBirth ?? null,
+          address: {
+            line1: d?.address1 ?? null,
+            city: d?.city ?? null,
+            state: d?.state ?? null,
+            zipCode: d?.postalCode ?? null,
+            country: d?.country ?? null,
+          },
+          tags: Array.isArray(d?.tags) ? d.tags : [],
+          customFields: Array.isArray(d?.customFields)
+            ? d.customFields.map((f) => ({
+                id: f?.id ?? null,
+                value: f?.value ?? null,
+              }))
+            : []
+        })`,
+            }),
+        },
         location: {
             get: makeOutput({
                 op: 'locationGet',
@@ -253,6 +317,61 @@ exports.helpers = {
                 full: `body`,
                 simple: `({
           succeded: body?.succeded ?? null,
+        })`,
+            }),
+        },
+        conversation: {
+            search: makeOutput({
+                op: 'conversationSearch',
+                key: 'conversation',
+                pre: `const list = body.conversations ?? [];`,
+                full: `list`,
+                simple: `(
+          Array.isArray(list)
+            ? list.map((c) => ({
+                id: c?.id ?? null,
+                contactId: c?.contactId ?? null,
+                contactName: c?.contactName ?? c?.fullName ?? null,
+                phone: c?.phone ?? null,
+                email: c?.email ?? null,
+                type: c?.type ?? null,
+                unreadCount: c?.unreadCount ?? 0,
+                inbox: c?.inbox ?? false,
+                lastMessageDate: c?.lastMessageDate ?? null,
+                lastMessageDirection: c?.lastMessageDirection ?? null,
+              }))
+            : []
+        )`,
+            }),
+            create: makeOutput({
+                op: 'conversationCreate',
+                key: 'conversation',
+                pre: `const d = body.conversation ?? null;`,
+                full: `d`,
+                simple: `(
+          d ? [{
+                id: d?.id ?? null,
+                contactId: d?.contactId ?? null,
+                contactName: null, // Not returned in create response
+                phone: null,       // Not returned in create response
+                email: null,       // Not returned in create response
+                type: null,        // Not returned in create response
+                unreadCount: 0,
+                inbox: true,
+                lastMessageDate: d?.lastMessageDate ?? null,
+                lastMessageDirection: null,
+              }]
+            : []
+        )`,
+            }),
+            delete: makeOutput({
+                op: 'conversationDelete',
+                key: 'conversation',
+                pre: ``,
+                full: `body`,
+                simple: `({
+          success: body?.success ?? false,
+          traceId: body?.traceId ?? null,
         })`,
             }),
         },

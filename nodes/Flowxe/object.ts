@@ -37,14 +37,46 @@ const bodies = {
       .filter((t) => t !== '');
     return { tags };
   })()}}`,
+  conversation: `={{(() => {
+    const body = {};
+    const locationId = $parameter.locationId;
+    const contactId = $parameter.contactId;
+
+    if (locationId !== undefined && locationId !== '') body.locationId = locationId;
+    if (contactId !== undefined && contactId !== '') body.contactId = contactId;
+    
+    return body;
+  })()}}`,
+  contactUpdate: `={{(() => {
+    const data = $parameter.contactFields;
+    const body = {};
+
+    // List of standard fields available in the contactFields collection
+    const keys = [
+      'firstName', 'lastName', 'email', 'phone', 'companyName', 
+      'address1', 'address2', 'city', 'state', 'postalCode', 
+      'country', 'website', 'timezone'
+    ];
+
+    // Iterate over keys. If defined in parameters:
+    // Check if empty string -> send null (to clear). Otherwise send value.
+    keys.forEach((key) => {
+      if (data[key] !== undefined) {
+        body[key] = data[key] === '' ? null : data[key];
+      }
+    });
+
+    // Pass Custom Fields through if they exist
+    if (data.customFields && data.customFields.customField) {
+      body.customFields = data.customFields.customField;
+    }
+
+    return body;
+  })()}}`,
 }
 
+const fields = {
 
-// fields
-// recource
-
-
-const fieldDefs = {
   apiKey: {
     displayName: "API Key",
     name: "apiKey",
@@ -210,9 +242,17 @@ const fieldDefs = {
       },
     ],
   } as INodeProperties,
+  conversationId: {
+    displayName: "Conversation ID",
+    name: "conversationId",
+    type: "string",
+    default: "",
+    required: true,
+    description: "The ID of the conversation",
+  } as INodeProperties,
 }
 
-type FieldKey = keyof typeof fieldDefs
+type FieldKey = keyof typeof fields
 
 // ----------------------------------------------------------------------
 // 2. RESOURCE BUILDER
@@ -285,7 +325,7 @@ function operation(
 
   for (const [fieldKey, operationSet] of fieldUsage.entries())
   {
-    const baseField = fieldDefs[fieldKey]
+    const baseField = fields[fieldKey]
     if (baseField)
     {
       fieldObjects.push({
@@ -313,17 +353,86 @@ export const resource: INodeProperties = {
   name: "resource",
   type: "options",
   noDataExpression: true,
+  // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
   options: [
-    { name: "Custom Field", value: "customField" },
+    { name: "Contact", value: "contact" },
     { name: "Location", value: "location" },
-    { name: "Note", value: "note" },
     { name: "Phone Number", value: "phoneNumber" },
+    { name: "Custom Field", value: "customField" },
     { name: "Pipeline", value: "pipeline" },
     { name: "Tag", value: "tag" },
+    { name: "Note", value: "note" },
     { name: "Task", value: "task" },
+    { name: "Conversation", value: "conversation" },
   ],
-  default: "location",
+  default: "contact",
 }
+export const contact = operation("contact", [
+  {// contact.Get
+    action: {
+      name: "Get",
+      value: "contactGet",
+      description: "Get a contact by contactId",
+      method: "GET",
+      url: "=/contacts/{{$parameter.contactId}}",
+      outputHelper: helpers.output.contact.get,
+    },
+    fields: ["apiKey", "contactId", "outputFormat"],
+  },
+  {// contact.Update
+    action: {
+      name: "Update",
+      value: "contactUpdate",
+      description: "Update a contact (Empty strings clear the field)",
+      method: "PUT",
+      url: "=/contacts/{{$parameter.contactId}}",
+      body: bodies.contactUpdate,
+      outputHelper: helpers.output.contact.update,
+    },
+    fields: ["apiKey", "contactId", "contactFields", "outputFormat"],
+  },
+])
+export const conversation = operation("conversation", [
+  {// conversation.Delete
+    action: {
+      name: "Delete",
+      value: "conversationDelete",
+      description: "Delete a conversation by conversationId",
+      method: "DELETE",
+      url: "=/conversations/{{$parameter.conversationId}}",
+      outputHelper: helpers.output.conversation.delete,
+    },
+    fields: ["apiKey", "conversationId", "outputFormat"],
+  },
+  {// conversation.Search
+    action: {
+      name: "Search",
+      value: "conversationSearch",
+      description: "Search for conversations (params in body)",
+      method: "GET",
+      url: "=/conversations/search",
+      qs: {
+        locationId: "={{$parameter.locationId}}",
+        contactId: "={{$parameter.contactId}}",
+      },
+      body: bodies.conversation,
+      outputHelper: helpers.output.conversation.search,
+    },
+    fields: ["apiKey", "locationId", "contactId", "outputFormat"],
+  },
+  {// conversation.Create
+    action: {
+      name: "Create",
+      value: "conversationCreate",
+      description: "Create a new conversation",
+      method: "POST",
+      url: "=/conversations/",
+      body: bodies.conversation,
+      outputHelper: helpers.output.conversation.create,
+    },
+    fields: ["apiKey", "locationId", "contactId", "outputFormat"],
+  },
+])
 export const location = operation("location", [
   {// location.Get
     action: {
@@ -377,65 +486,6 @@ export const customField = operation("customField", [
     fields: ["apiKey", "locationId", "customFieldsModel", "outputFormat"],
   },
 ])
-export const note = operation("note", [
-  {// note.GetAll     
-    action: {
-      name: "Get All",
-      value: "noteGetAll",
-      description: "Get All notes for a contact by contactId",
-      method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}/notes",
-      outputHelper: helpers.output.note.getAll,
-    },
-    fields: ["apiKey", "contactId", "outputFormat"],
-  },
-  {// note.Create 
-    action: {
-      name: "Create",
-      value: "noteCreate",
-      description: "Create a note for a contact by contactId",
-      method: "POST",
-      url: "=/contacts/{{$parameter.contactId}}/notes",
-      body: bodies.note,
-      outputHelper: helpers.output.note.create,
-    },
-    fields: ["apiKey", "contactId", "message", "userId", "outputFormat"],
-  },
-  {// note.Get
-    action: {
-      name: "Get",
-      value: "noteGet",
-      description: "Get a note by contactId + noteId",
-      method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
-      outputHelper: helpers.output.note.get,
-    },
-    fields: ["apiKey", "contactId", "noteId", "outputFormat"],
-  },
-  {// note.Update
-    action: {
-      name: "Update",
-      value: "noteUpdate",
-      description: "Update a note by contactId + noteId",
-      method: "PUT",
-      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
-      body: bodies.note,
-      outputHelper: helpers.output.note.update,
-    },
-    fields: ["apiKey", "contactId", "noteId", "message", "userId", "outputFormat"],
-  },
-  {// note.Delete
-    action: {
-      name: "Delete",
-      value: "noteDelete",
-      description: "Delete a note by contactId + noteId",
-      method: "DELETE",
-      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
-      outputHelper: helpers.output.note.delete,
-    },
-    fields: ["apiKey", "contactId", "noteId", "outputFormat"],
-  },
-])
 export const tag = operation("tag", [
   {// tag.Add
     action: {
@@ -462,7 +512,77 @@ export const tag = operation("tag", [
     fields: ["apiKey", "contactId", "tags", "outputFormat"],
   },
 ])
+export const note = operation("note", [
+  {// note.Get
+    action: {
+      name: "Get",
+      value: "noteGet",
+      description: "Get a note by contactId + noteId",
+      method: "GET",
+      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
+      outputHelper: helpers.output.note.get,
+    },
+    fields: ["apiKey", "contactId", "noteId", "outputFormat"],
+  },
+  {// note.GetAll     
+    action: {
+      name: "Get All",
+      value: "noteGetAll",
+      description: "Get All notes for a contact by contactId",
+      method: "GET",
+      url: "=/contacts/{{$parameter.contactId}}/notes",
+      outputHelper: helpers.output.note.getAll,
+    },
+    fields: ["apiKey", "contactId", "outputFormat"],
+  },
+  {// note.Create 
+    action: {
+      name: "Create",
+      value: "noteCreate",
+      description: "Create a note for a contact by contactId",
+      method: "POST",
+      url: "=/contacts/{{$parameter.contactId}}/notes",
+      body: bodies.note,
+      outputHelper: helpers.output.note.create,
+    },
+    fields: ["apiKey", "contactId", "message", "userId", "outputFormat"],
+  },
+  {// note.Update
+    action: {
+      name: "Update",
+      value: "noteUpdate",
+      description: "Update a note by contactId + noteId",
+      method: "PUT",
+      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
+      body: bodies.note,
+      outputHelper: helpers.output.note.update,
+    },
+    fields: ["apiKey", "contactId", "noteId", "message", "userId", "outputFormat"],
+  },
+  {// note.Delete
+    action: {
+      name: "Delete",
+      value: "noteDelete",
+      description: "Delete a note by contactId + noteId",
+      method: "DELETE",
+      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
+      outputHelper: helpers.output.note.delete,
+    },
+    fields: ["apiKey", "contactId", "noteId", "outputFormat"],
+  },
+])
 export const task = operation("task", [
+  {// task.Get
+    action: {
+      name: "Get",
+      value: "taskGet",
+      description: "Get a task by contactId + taskId",
+      method: "GET",
+      url: "=/contacts/{{$parameter.contactId}}/tasks/{{$parameter.taskId}}",
+      outputHelper: helpers.output.task.get,
+    },
+    fields: ["apiKey", "contactId", "taskId", "outputFormat"],
+  },
   {// task.GetAll
     action: {
       name: "Get All",
@@ -485,17 +605,6 @@ export const task = operation("task", [
       outputHelper: helpers.output.task.create,
     },
     fields: ["apiKey", "contactId", "title", "message", "taskDueDate", "taskCompleted", "userId", "outputFormat",],
-  },
-  {// task.Get
-    action: {
-      name: "Get",
-      value: "taskGet",
-      description: "Get a task by contactId + taskId",
-      method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}/tasks/{{$parameter.taskId}}",
-      outputHelper: helpers.output.task.get,
-    },
-    fields: ["apiKey", "contactId", "taskId", "outputFormat"],
   },
   {// task.Update
     action: {

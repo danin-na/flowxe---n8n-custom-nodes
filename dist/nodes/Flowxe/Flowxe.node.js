@@ -59,6 +59,8 @@ class Flowxe {
             },
             properties: [
                 obj.resource,
+                ...obj.contact,
+                ...obj.conversation,
                 ...obj.location,
                 ...obj.phoneNumber,
                 ...obj.pipeline,

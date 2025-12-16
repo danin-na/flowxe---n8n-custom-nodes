@@ -1,5 +1,9 @@
 export declare const helpers: {
     readonly output: {
+        readonly contact: {
+            readonly get: string;
+            readonly update: string;
+        };
         readonly location: {
             readonly get: string;
         };
@@ -28,6 +32,11 @@ export declare const helpers: {
             readonly getAll: string;
             readonly create: string;
             readonly update: string;
+            readonly delete: string;
+        };
+        readonly conversation: {
+            readonly search: string;
+            readonly create: string;
             readonly delete: string;
         };
     };

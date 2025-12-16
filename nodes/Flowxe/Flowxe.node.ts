@@ -27,6 +27,8 @@ export class Flowxe implements INodeType
 
 		properties: [
 			obj.resource,
+			...obj.contact,
+			...obj.conversation,
 			...obj.location,
 			...obj.phoneNumber,
 			...obj.pipeline,
