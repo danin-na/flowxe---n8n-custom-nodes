@@ -4,9 +4,9 @@ exports.helpers = void 0;
 function makeOutput(spec) {
     var _a;
     return `={{(() => {
-		const mode = $parameter.outputFormat ?? 'sanitizedSimple';
-		const op = $parameter.operation;
-		const body = $response.body ?? {};
+		const mode    = $parameter.outputFormat ?? 'sanitizedSimple';
+		const op      = $parameter.operation;
+		const body    = $response.body ?? {};
 
 		// Debug Mode (RAW)
 		if (mode === 'raw') return body;
@@ -29,30 +29,42 @@ exports.helpers = {
             get: makeOutput({
                 op: 'contactGet',
                 key: 'contact',
-                pre: `const d = body.contact ?? body ?? {};`,
-                full: `d`,
-                simple: `({
-          id: d?.id ?? null,
-          name: d?.name ?? null,
-          firstName: d?.firstName ?? null,
-          lastName: d?.lastName ?? null,
-          email: d?.email ?? null,
-          phone: d?.phone ?? null,
-          website: d?.website ?? null,
-          assignedTo: d?.assignedTo ?? null,
-          dateOfBirth: d?.dateOfBirth ?? null,
-          address: {
-            line1: d?.address1 ?? null,
-            city: d?.city ?? null,
-            state: d?.state ?? null,
-            zipCode: d?.postalCode ?? null,
-            country: d?.country ?? null,
+                pre: `const d = body.contact ?? {};`,
+                full: `({
+          id          : d.id ?? null,
+          name        : d.name ?? null,
+          firstName   : d.firstName ?? null,
+          lastName    : d.lastName ?? null,
+          email       : d.email ?? null,
+          phone       : d.phone ?? null,
+          website     : d.website ?? null,
+          assignedTo  : d.assignedTo ?? null,
+          dateOfBirth : d.dateOfBirth ?? null,
+          address     : {
+            line1     : d.address1 ?? null,
+            city      : d.city ?? null,
+            state     : d.state ?? null,
+            zipCode   : d.postalCode ?? null,
+            country   : d.country ?? null,
           },
-          tags: Array.isArray(d?.tags) ? d.tags : [],
-          customFields: Array.isArray(d?.customFields)
+          customFields: Array.isArray(d.customFields)
             ? d.customFields.map((f) => ({
-                id: f?.id ?? null,
-                value: f?.value ?? null,
+                id: f.id ?? null,
+                value: f.value ?? null,
+              }))
+            : []
+        })`,
+                simple: `({
+          id          : d.id ?? null,
+          name        : d.name ?? null,
+          firstName   : d.firstName ?? null,
+          lastName    : d.lastName ?? null,
+          email       : d.email ?? null,
+          phone       : d.phone ?? null,
+          customFields: Array.isArray(d.customFields)
+            ? d.customFields.map((f) => ({
+                id: f.id ?? null,
+                value: f.value ?? null,
               }))
             : []
         })`,
@@ -60,7 +72,7 @@ exports.helpers = {
             update: makeOutput({
                 op: 'contactUpdate',
                 key: 'contact',
-                pre: `const d = body.contact ?? body ?? {};`,
+                pre: `const d = body.contact ?? {};`,
                 full: `d`,
                 simple: `({
           id: d?.id ?? null,

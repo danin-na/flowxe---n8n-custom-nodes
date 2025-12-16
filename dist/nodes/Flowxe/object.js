@@ -4,15 +4,15 @@ exports.task = exports.note = exports.tag = exports.customField = exports.pipeli
 const _helpers_1 = require("./_helpers");
 const bodies = {
     note: `={{(() => {
-    const body = { body: $parameter.message };
+    const body = { body: $parameter.contentMessage };
     const userId = $parameter.userId;
     if (userId !== undefined && userId !== '') body.userId = userId;
     return body;
   })()}}`,
     task: `={{(() => {
     const body = {};
-    const title = $parameter.title;
-    const message = $parameter.message;
+    const title = $parameter.contentTitle;
+    const message = $parameter.contentMessage;
     const dueDate = $parameter.taskDueDate;
     const completed = $parameter.taskCompleted;
     const userId = $parameter.userId;
@@ -71,179 +71,211 @@ const bodies = {
     return body;
   })()}}`,
 };
-const fields = {
-    apiKey: {
-        displayName: "API Key",
-        name: "apiKey",
-        type: "string",
-        default: "",
-        required: true,
-        typeOptions: { password: true },
-        description: "Private Integration Token (Authorization: Bearer ...)",
-    },
-    outputFormat: {
-        displayName: "Output Format",
-        name: "outputFormat",
-        type: "options",
-        noDataExpression: true,
-        default: "sanitizedSimple",
-        description: "RAW returns the full API response. Sanitized returns a cleaned object output.",
-        options: [
-            { name: "Debug Mode (RAW)", value: "raw" },
-            { name: "Sanitized Full", value: "sanitizedFull" },
-            { name: "Sanitized Simple", value: "sanitizedSimple" },
-        ],
-    },
-    emptyStringAsNull: {
-        displayName: "Pass Null To Clear Fields",
-        name: "emptyStringAsNull",
-        type: "boolean",
-        default: false,
-        description: "Whether to send empty string fields as null values to clear the fields from the record",
-    },
-    message: {
-        displayName: "Message",
-        name: "message",
-        type: "string",
-        default: "",
-        required: true,
-        description: "Message body or content",
-    },
-    userId: {
-        displayName: "User ID",
-        name: "userId",
-        type: "string",
-        default: "",
-        description: "Assign this to a user with User ID",
-    },
-    title: {
-        displayName: "Title",
-        name: "title",
-        type: "string",
-        default: "",
-        description: "Assign title to the object",
-    },
-    contactId: {
-        displayName: "Contact ID",
-        name: "contactId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the contact",
-    },
-    locationId: {
-        displayName: "Location ID",
-        name: "locationId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the location",
-    },
-    noteId: {
-        displayName: "Note ID",
-        name: "noteId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the note",
-    },
-    taskId: {
-        displayName: "Task ID",
-        name: "taskId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the task",
-    },
-    tags: {
-        displayName: "Tags",
-        name: "tagTags",
-        type: "string",
-        default: "",
-        required: true,
-        description: "Comma-separated tags (e.g. vip, lead, booked)",
-    },
-    taskDueDate: {
-        displayName: "Due Date",
-        name: "taskDueDate",
-        type: "string",
-        default: "",
-        description: "Due date (string, typically ISO 8601)",
-    },
-    taskCompleted: {
-        displayName: "Completed",
-        name: "taskCompleted",
-        type: "options",
-        noDataExpression: true,
-        default: "unset",
-        description: "Set task completion status (Unset will not send the field)",
-        options: [
-            { name: "Unset", value: "unset" },
-            { name: "True", value: "true" },
-            { name: "False", value: "false" },
-        ],
-    },
-    customFieldsModel: {
-        displayName: "Custom Fields Model",
-        name: "customFieldsModel",
-        type: "options",
-        noDataExpression: true,
-        default: "all",
-        description: "The model to which the custom field belongs",
-        options: [
-            { name: "All", value: "all" },
-            { name: "Contact", value: "contact" },
-            { name: "Opportunity", value: "opportunity" },
-        ],
-    },
-    contactFields: {
-        displayName: "Contact Fields",
-        name: "contactFields",
-        type: "collection",
-        default: {},
-        placeholder: "Add Field",
-        description: "The fields to update for the contact",
-        options: [
-            { displayName: "First Name", name: "firstName", type: "string", default: "" },
-            { displayName: "Last Name", name: "lastName", type: "string", default: "" },
-            { displayName: "Email", name: "email", type: "string", default: "", placeholder: "" },
-            { displayName: "Phone", name: "phone", type: "string", default: "" },
-            { displayName: "Company Name", name: "companyName", type: "string", default: "" },
-            { displayName: "Address Line 1", name: "address1", type: "string", default: "" },
-            { displayName: "Address Line 2", name: "address2", type: "string", default: "" },
-            { displayName: "City", name: "city", type: "string", default: "" },
-            { displayName: "State", name: "state", type: "string", default: "" },
-            { displayName: "Postal Code", name: "postalCode", type: "string", default: "" },
-            { displayName: "Country", name: "country", type: "string", default: "" },
-            { displayName: "Website", name: "website", type: "string", default: "" },
-            { displayName: "Timezone", name: "timezone", type: "string", default: "" },
-            {
-                displayName: "Custom Fields",
-                name: "customFields",
-                type: "fixedCollection",
-                default: {},
-                typeOptions: { multipleValues: true },
+const f = {
+    cmn: {
+        auth: {
+            apiKey: {
+                displayName: "API Key",
+                name: "apiKey",
+                type: "string",
+                default: "",
+                required: true,
+                typeOptions: { password: true },
+                description: "Private Integration Token (Authorization: Bearer ...)",
+            },
+        },
+        date: {
+            due: {
+                displayName: "Due Date",
+                name: "taskDueDate",
+                type: "string",
+                default: "",
+                description: "Due date (string, typically ISO 8601)",
+            },
+        },
+        content: {
+            title: {
+                displayName: "Title",
+                name: "contentTitle",
+                type: "string",
+                default: "",
+                description: "Assign title to the object",
+            },
+            message: {
+                displayName: "Message Body",
+                name: "contentMessage",
+                type: "string",
+                default: "",
+                required: true,
+                description: "Message body or content",
+            },
+        },
+        input: {
+            emptyStringAsNull: {
+                displayName: "Pass Null To Clear Fields",
+                name: "emptyStringAsNull",
+                type: "boolean",
+                default: false,
+                description: "Whether to send empty string fields as null values to clear the fields from the record",
+            },
+        },
+        output: {
+            format: {
+                displayName: "Output Format",
+                name: "outputFormat",
+                type: "options",
+                noDataExpression: true,
+                default: "sanitizedSimple",
+                description: "RAW returns the full API response. Sanitized returns a cleaned object output.",
                 options: [
+                    { name: "Debug Mode (RAW)", value: "raw" },
+                    { name: "Sanitized Full", value: "sanitizedFull" },
+                    { name: "Sanitized Simple", value: "sanitizedSimple" },
+                ],
+            },
+        },
+        status: {
+            completed: {
+                displayName: "Completed",
+                name: "taskCompleted",
+                type: "options",
+                noDataExpression: true,
+                default: "unset",
+                description: "Set task completion status (Unset will not send the field)",
+                options: [
+                    { name: "Unset", value: "unset" },
+                    { name: "True", value: "true" },
+                    { name: "False", value: "false" },
+                ],
+            },
+        }
+    },
+    obj: {
+        location: {
+            id: {
+                displayName: "Location ID",
+                name: "locationId",
+                type: "string",
+                default: "",
+                required: true,
+                description: "The ID of the location",
+            },
+        },
+        contact: {
+            id: {
+                displayName: "Contact ID",
+                name: "contactId",
+                type: "string",
+                default: "",
+                required: true,
+                description: "The ID of the contact",
+            },
+            fields: {
+                displayName: "Contact Fields",
+                name: "contactFields",
+                type: "collection",
+                default: {},
+                placeholder: "Add Field",
+                description: "The fields to update for the contact",
+                options: [
+                    { displayName: "First Name", name: "firstName", type: "string", default: "" },
+                    { displayName: "Last Name", name: "lastName", type: "string", default: "" },
+                    { displayName: "Email", name: "email", type: "string", default: "", placeholder: "" },
+                    { displayName: "Phone", name: "phone", type: "string", default: "" },
+                    { displayName: "Company Name", name: "companyName", type: "string", default: "" },
+                    { displayName: "Address Line 1", name: "address1", type: "string", default: "" },
+                    { displayName: "Address Line 2", name: "address2", type: "string", default: "" },
+                    { displayName: "City", name: "city", type: "string", default: "" },
+                    { displayName: "State", name: "state", type: "string", default: "" },
+                    { displayName: "Postal Code", name: "postalCode", type: "string", default: "" },
+                    { displayName: "Country", name: "country", type: "string", default: "" },
+                    { displayName: "Website", name: "website", type: "string", default: "" },
+                    { displayName: "Timezone", name: "timezone", type: "string", default: "" },
                     {
-                        name: "customField",
-                        displayName: "Custom Field",
-                        values: [
-                            { displayName: "Field ID", name: "id", type: "string", default: "", required: true },
-                            { displayName: "Value", name: "value", type: "string", default: "" },
+                        displayName: "Custom Fields",
+                        name: "customFields",
+                        type: "fixedCollection",
+                        default: {},
+                        typeOptions: { multipleValues: true },
+                        options: [
+                            {
+                                name: "customField",
+                                displayName: "Custom Field",
+                                values: [
+                                    { displayName: "Field ID", name: "id", type: "string", default: "", required: true },
+                                    { displayName: "Value", name: "value", type: "string", default: "" },
+                                ],
+                            },
                         ],
                     },
                 ],
             },
-        ],
-    },
-    conversationId: {
-        displayName: "Conversation ID",
-        name: "conversationId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the conversation",
-    },
+        },
+        note: {
+            id: {
+                displayName: "Note ID",
+                name: "noteId",
+                type: "string",
+                default: "",
+                required: true,
+                description: "The ID of the note",
+            },
+        },
+        task: {
+            id: {
+                displayName: "Task ID",
+                name: "taskId",
+                type: "string",
+                default: "",
+                required: true,
+                description: "The ID of the task",
+            },
+        },
+        tag: {
+            tags: {
+                displayName: "Tags",
+                name: "tagTags",
+                type: "string",
+                default: "",
+                required: true,
+                description: "Comma-separated tags (e.g. vip, lead, booked)",
+            },
+        },
+        conversation: {
+            id: {
+                displayName: "Conversation ID",
+                name: "conversationId",
+                type: "string",
+                default: "",
+                required: true,
+                description: "The ID of the conversation",
+            },
+        },
+        user: {
+            id: {
+                displayName: "User ID",
+                name: "userId",
+                type: "string",
+                default: "",
+                description: "Assign this to a user with User ID",
+            },
+        },
+        customField: {
+            model: {
+                displayName: "Custom Fields Model",
+                name: "customFieldsModel",
+                type: "options",
+                noDataExpression: true,
+                default: "all",
+                description: "The model to which the custom field belongs",
+                options: [
+                    { name: "All", value: "all" },
+                    { name: "Contact", value: "contact" },
+                    { name: "Opportunity", value: "opportunity" },
+                ],
+            },
+        }
+    }
 };
 function operation(resourceName, operations) {
     var _a;
@@ -275,28 +307,25 @@ function operation(resourceName, operations) {
     };
     const fieldUsage = new Map();
     for (const op of operations) {
-        for (const fieldKey of op.fields) {
-            if (!fieldUsage.has(fieldKey)) {
-                fieldUsage.set(fieldKey, new Set());
+        for (const field of op.fields) {
+            if (!fieldUsage.has(field)) {
+                fieldUsage.set(field, new Set());
             }
-            fieldUsage.get(fieldKey).add(op.action.value);
+            fieldUsage.get(field).add(op.action.value);
         }
     }
     const fieldObjects = [];
-    for (const [fieldKey, operationSet] of fieldUsage.entries()) {
-        const baseField = fields[fieldKey];
-        if (baseField) {
-            fieldObjects.push({
-                ...baseField,
-                displayOptions: {
-                    ...((_a = baseField.displayOptions) !== null && _a !== void 0 ? _a : {}),
-                    show: {
-                        resource: [resourceName],
-                        operation: Array.from(operationSet),
-                    },
+    for (const [fieldRef, operationSet] of fieldUsage.entries()) {
+        fieldObjects.push({
+            ...fieldRef,
+            displayOptions: {
+                ...((_a = fieldRef.displayOptions) !== null && _a !== void 0 ? _a : {}),
+                show: {
+                    resource: [resourceName],
+                    operation: Array.from(operationSet),
                 },
-            });
-        }
+            },
+        });
     }
     return [operationField, ...fieldObjects];
 }
@@ -328,7 +357,11 @@ exports.contact = operation("contact", [
             url: "=/contacts/{{$parameter.contactId}}",
             outputHelper: _helpers_1.helpers.output.contact.get,
         },
-        fields: ["apiKey", "contactId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -340,7 +373,12 @@ exports.contact = operation("contact", [
             body: bodies.contactUpdate,
             outputHelper: _helpers_1.helpers.output.contact.update,
         },
-        fields: ["apiKey", "contactId", "contactFields", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.contact.fields,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.conversation = operation("conversation", [
@@ -353,7 +391,11 @@ exports.conversation = operation("conversation", [
             url: "=/conversations/{{$parameter.conversationId}}",
             outputHelper: _helpers_1.helpers.output.conversation.delete,
         },
-        fields: ["apiKey", "conversationId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.conversation.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -369,7 +411,12 @@ exports.conversation = operation("conversation", [
             body: bodies.conversation,
             outputHelper: _helpers_1.helpers.output.conversation.search,
         },
-        fields: ["apiKey", "locationId", "contactId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.location.id,
+            f.obj.contact.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -381,7 +428,12 @@ exports.conversation = operation("conversation", [
             body: bodies.conversation,
             outputHelper: _helpers_1.helpers.output.conversation.create,
         },
-        fields: ["apiKey", "locationId", "contactId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.location.id,
+            f.obj.contact.id,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.location = operation("location", [
@@ -394,7 +446,11 @@ exports.location = operation("location", [
             url: "=/locations/{{$parameter.locationId}}",
             outputHelper: _helpers_1.helpers.output.location.get,
         },
-        fields: ["apiKey", "locationId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.location.id,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.phoneNumber = operation("phoneNumber", [
@@ -407,7 +463,11 @@ exports.phoneNumber = operation("phoneNumber", [
             url: "=/phone-system/numbers/location/{{$parameter.locationId}}",
             outputHelper: _helpers_1.helpers.output.phoneNumber.getAll,
         },
-        fields: ["apiKey", "locationId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.location.id,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.pipeline = operation("pipeline", [
@@ -420,7 +480,11 @@ exports.pipeline = operation("pipeline", [
             url: "=/opportunities/pipelines?locationId={{$parameter.locationId}}",
             outputHelper: _helpers_1.helpers.output.pipeline.getAll,
         },
-        fields: ["apiKey", "locationId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.location.id,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.customField = operation("customField", [
@@ -434,7 +498,12 @@ exports.customField = operation("customField", [
             qs: { model: "={{$parameter.customFieldsModel}}" },
             outputHelper: _helpers_1.helpers.output.customField.getAll,
         },
-        fields: ["apiKey", "locationId", "customFieldsModel", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.location.id,
+            f.obj.customField.model,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.tag = operation("tag", [
@@ -448,7 +517,12 @@ exports.tag = operation("tag", [
             body: bodies.tag,
             outputHelper: _helpers_1.helpers.output.tag.add,
         },
-        fields: ["apiKey", "contactId", "tags", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.tag.tags,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -460,7 +534,12 @@ exports.tag = operation("tag", [
             body: bodies.tag,
             outputHelper: _helpers_1.helpers.output.tag.remove,
         },
-        fields: ["apiKey", "contactId", "tags", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.tag.tags,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.note = operation("note", [
@@ -473,7 +552,12 @@ exports.note = operation("note", [
             url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
             outputHelper: _helpers_1.helpers.output.note.get,
         },
-        fields: ["apiKey", "contactId", "noteId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.note.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -484,7 +568,11 @@ exports.note = operation("note", [
             url: "=/contacts/{{$parameter.contactId}}/notes",
             outputHelper: _helpers_1.helpers.output.note.getAll,
         },
-        fields: ["apiKey", "contactId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -496,7 +584,13 @@ exports.note = operation("note", [
             body: bodies.note,
             outputHelper: _helpers_1.helpers.output.note.create,
         },
-        fields: ["apiKey", "contactId", "message", "userId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.cmn.content.message,
+            f.obj.user.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -508,7 +602,14 @@ exports.note = operation("note", [
             body: bodies.note,
             outputHelper: _helpers_1.helpers.output.note.update,
         },
-        fields: ["apiKey", "contactId", "noteId", "message", "userId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.note.id,
+            f.cmn.content.message,
+            f.obj.user.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -519,7 +620,12 @@ exports.note = operation("note", [
             url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
             outputHelper: _helpers_1.helpers.output.note.delete,
         },
-        fields: ["apiKey", "contactId", "noteId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.note.id,
+            f.cmn.output.format
+        ],
     },
 ]);
 exports.task = operation("task", [
@@ -532,7 +638,12 @@ exports.task = operation("task", [
             url: "=/contacts/{{$parameter.contactId}}/tasks/{{$parameter.taskId}}",
             outputHelper: _helpers_1.helpers.output.task.get,
         },
-        fields: ["apiKey", "contactId", "taskId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.task.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -543,7 +654,11 @@ exports.task = operation("task", [
             url: "=/contacts/{{$parameter.contactId}}/tasks",
             outputHelper: _helpers_1.helpers.output.task.getAll,
         },
-        fields: ["apiKey", "contactId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.cmn.output.format
+        ],
     },
     {
         action: {
@@ -555,7 +670,16 @@ exports.task = operation("task", [
             body: bodies.task,
             outputHelper: _helpers_1.helpers.output.task.create,
         },
-        fields: ["apiKey", "contactId", "title", "message", "taskDueDate", "taskCompleted", "userId", "outputFormat",],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.cmn.content.title,
+            f.cmn.content.message,
+            f.cmn.date.due,
+            f.cmn.status.completed,
+            f.obj.user.id,
+            f.cmn.output.format,
+        ],
     },
     {
         action: {
@@ -567,7 +691,17 @@ exports.task = operation("task", [
             body: bodies.task,
             outputHelper: _helpers_1.helpers.output.task.update,
         },
-        fields: ["apiKey", "contactId", "taskId", "title", "message", "taskDueDate", "taskCompleted", "userId", "outputFormat",],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.task.id,
+            f.cmn.content.title,
+            f.cmn.content.message,
+            f.cmn.date.due,
+            f.cmn.status.completed,
+            f.obj.user.id,
+            f.cmn.output.format,
+        ],
     },
     {
         action: {
@@ -578,7 +712,12 @@ exports.task = operation("task", [
             url: "=/contacts/{{$parameter.contactId}}/tasks/{{$parameter.taskId}}",
             outputHelper: _helpers_1.helpers.output.task.delete,
         },
-        fields: ["apiKey", "contactId", "taskId", "outputFormat"],
+        fields: [
+            f.cmn.auth.apiKey,
+            f.obj.contact.id,
+            f.obj.task.id,
+            f.cmn.output.format
+        ],
     },
 ]);
 //# sourceMappingURL=object.js.map
