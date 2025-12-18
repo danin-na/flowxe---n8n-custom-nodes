@@ -69,6 +69,10 @@ class Flowxe {
                 ...obj.phoneNumber.fields,
                 obj.customField.operation,
                 ...obj.customField.fields,
+                obj.task.operation,
+                ...obj.task.fields,
+                obj.tag.operation,
+                ...obj.tag.fields,
             ],
         };
     }

@@ -37,16 +37,10 @@ export class Flowxe implements INodeType
 			...obj.phoneNumber.fields,
 			obj.customField.operation,
 			...obj.customField.fields,
-			/*
-			...obj.conversation,
-			...obj.location,
-			...obj.phoneNumber,
-			...obj.pipeline,
-			...obj.customField,
-			...obj.note,
-			...obj.tag,
-			...obj.task,
-			*/
+			obj.task.operation,
+			...obj.task.fields,
+			obj.tag.operation,
+			...obj.tag.fields,
 		],
 	};
 }

@@ -213,6 +213,120 @@ const field = {
       description: "Fields to update on the contact",
     } as INodeProperties,
   },
+  task: {
+    id: {
+      displayName: "Task ID",
+      name: "f_task_id",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The ID of the task",
+    } as INodeProperties,
+    title: {
+      displayName: "Title",
+      name: "f_task_title",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The title of the task",
+    } as INodeProperties,
+    body: {
+      displayName: "Body",
+      name: "f_task_body",
+      type: "string",
+      default: "",
+      description: "The description of the task",
+    } as INodeProperties,
+    dueDate: {
+      displayName: "Due Date",
+      name: "f_task_dueDate",
+      type: "dateTime",
+      default: "",
+      required: true,
+      description: "The due date of the task. Format: ISO 8601.",
+    } as INodeProperties,
+    assignedTo: {
+      displayName: "Assigned To",
+      name: "f_task_assignedTo",
+      type: "string",
+      default: "",
+      description: "The ID of the user the task is assigned to",
+    } as INodeProperties,
+    completed: {
+      displayName: "Completed",
+      name: "f_task_completed",
+      type: "boolean",
+      default: false,
+      description: "Whether the task is completed",
+    } as INodeProperties,
+    updateFields: {
+      displayName: "Update Fields",
+      name: "f_task_updateFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      options: [
+        {
+          displayName: "Assigned To",
+          name: "assignedTo",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Body",
+          name: "body",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Completed",
+          name: "completed",
+          type: "boolean",
+          default: false,
+        },
+        {
+          displayName: "Due Date",
+          name: "dueDate",
+          type: "string",
+          default: "",
+          description: "Format: ISO 8601",
+        },
+        {
+          displayName: "Title",
+          name: "title",
+          type: "string",
+          default: "",
+        },
+      ],
+    } as INodeProperties,
+  },
+  tag: {
+    id: {
+      displayName: "Tag ID",
+      name: "f_tag_id",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The ID of the tag",
+    } as INodeProperties,
+    name: {
+      displayName: "Name",
+      name: "f_tag_name",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The name of the tag",
+    } as INodeProperties,
+    tags: {
+      displayName: "Tags",
+      name: "f_tag_tags",
+      type: "string",
+      default: "",
+      placeholder: "new customer, ready to buy, vip-member",
+      required: true,
+      description: "Tags to add/remove, comma-separated",
+    } as INodeProperties,
+  },
 }
 
 // ----------------------------------------------------------------------
@@ -231,6 +345,7 @@ type Action = {
   qs?: Record<string, string>
 }
 type Output = {
+  name: string
   extract: string
   sanitizedFull: string
   sanitizedSimple: string
@@ -298,9 +413,8 @@ function createOperation(name: string, definitions: Operation[])
                             const body = $response.body
                             const data = $response.body.${out.extract} ?? {}
                             if(mode === 'raw') return { rawResponse:body };
-                            if(mode === 'sanitizedFull') return { ${name}: ${out.sanitizedFull} }
-                            if(mode === 'sanitizedSimple') return { ${name}: ${out.sanitizedSimple} }
-
+                            if(mode === 'sanitizedFull') return { ${out.name}: ${out.sanitizedFull} }
+                            if(mode === 'sanitizedSimple') return { ${out.name}: ${out.sanitizedSimple} }
                           })()}}` }
             }]
           }
@@ -342,6 +456,7 @@ export const location = createOperation("location", [
       url: "=/locations/{{$parameter.f_location_id}}",
     },
     output: {
+      name: "location",
       extract: "location",
       sanitizedFull: `({
           id        : data.id ?? null,
@@ -371,7 +486,7 @@ export const location = createOperation("location", [
   },
 ])
 export const pipeline = createOperation("pipeline", [
-  {// pipeline.GetAll
+  {// pipeline.GetMany
     option: {
       name: "Get Many",
       value: "getMany",
@@ -385,6 +500,7 @@ export const pipeline = createOperation("pipeline", [
       },
     },
     output: {
+      name: "pipeline",
       extract: "pipelines",
       sanitizedFull: `data.map((item) => ({
           id: item.id ?? null,
@@ -421,6 +537,7 @@ export const phoneNumber = createOperation("phoneNumber", [
       url: "=/phone-system/numbers/location/{{$parameter.f_location_id}}",
     },
     output: {
+      name: "phoneNumber",
       extract: "numbers",
       sanitizedFull: `data.map((item) => ({
           id          : item.sid ?? null,
@@ -459,6 +576,7 @@ export const customField = createOperation("customField", [
       },
     },
     output: {
+      name: "customField",
       extract: "customFields",
       sanitizedFull: `data.map((item) => ({
           id          : item.id ?? null,
@@ -501,6 +619,7 @@ export const contact = createOperation("contact", [
       url: "=/contacts/{{$parameter.f_contact_id}}",
     },
     output: {
+      name: "contact",
       extract: "contact",
       sanitizedFull: `({
           id          : data.id ?? null,
@@ -564,6 +683,7 @@ export const contact = createOperation("contact", [
       })()}}`,
     },
     output: {
+      name: "contact",
       extract: "contact",
       sanitizedFull: `({
           id          : data.id ?? null,
@@ -604,6 +724,383 @@ export const contact = createOperation("contact", [
   },
 ])
 
+export const tag = createOperation("tag", [
+  { // tag.Add
+    option: {
+      name: "Add",
+      value: "add",
+      description: "Add tags to a contact",
+    },
+    action: {
+      method: "POST",
+      url: "=/contacts/{{$parameter.f_contact_id}}/tags",
+      body: `={{ { tags: ($parameter.f_tag_tags || '').split(',').map(t => t.trim()).filter(t => !!t) } }}`,
+    },
+    output: {
+      name: "tag",
+      extract: "tags",
+      sanitizedFull: `data`,
+      sanitizedSimple: `data`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.contact.id,
+      field.tag.tags,
+    ],
+  },
+  { // tag.Remove
+    option: {
+      name: "Remove",
+      value: "remove",
+      description: "Remove tags from a contact",
+    },
+    action: {
+      method: "DELETE",
+      url: "=/contacts/{{$parameter.f_contact_id}}/tags",
+      body: `={{ { tags: ($parameter.f_tag_tags || '').split(',').map(t => t.trim()).filter(t => !!t) } }}`,
+    },
+    output: {
+      name: "tag",
+      extract: "tags",
+      sanitizedFull: `data`,
+      sanitizedSimple: `data`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.contact.id,
+      field.tag.tags,
+    ],
+  },
+  { // tag.Get
+    option: {
+      name: "Get",
+      value: "get",
+      description: "Get a tag by tagId",
+    },
+    action: {
+      method: "GET",
+      url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
+    },
+    output: {
+      name: "tag",
+      extract: "tag",
+      sanitizedFull: `({
+          id          : data.id ?? null,
+          name        : data.name ?? null,
+          locationId  : data.locationId ?? null,
+      })`,
+      sanitizedSimple: `({
+          id    : data.id ?? null,
+          name  : data.name ?? null,
+      })`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+      field.tag.id,
+    ],
+  },
+  { // tag.GetMany
+    option: {
+      name: "Get Many",
+      value: "getMany",
+      description: "Get many tags for a location",
+    },
+    action: {
+      method: "GET",
+      url: "=/locations/{{$parameter.f_location_id}}/tags",
+    },
+    output: {
+      name: "tag",
+      extract: "tags",
+      sanitizedFull: `data.map((item) => ({
+          id          : item.id ?? null,
+          name        : item.name ?? null,
+          locationId  : item.locationId ?? null,
+      }))`,
+      sanitizedSimple: `data.map((item) => ({
+          id          : item.id ?? null,
+          name        : item.name ?? null,
+      }))`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+    ],
+  },
+  { // tag.Create
+    option: {
+      name: "Create",
+      value: "create",
+      description: "Create a new tag for a location",
+    },
+    action: {
+      method: "POST",
+      url: "=/locations/{{$parameter.f_location_id}}/tags",
+      body: `={{ { name: $parameter.f_tag_name } }}`,
+    },
+    output: {
+      name: "tag",
+      extract: "tag",
+      sanitizedFull: `({
+          id          : data.id ?? null,
+          name        : data.name ?? null,
+          locationId  : data.locationId ?? null,
+      })`,
+      sanitizedSimple: `({
+          id    : data.id ?? null,
+          name  : data.name ?? null,
+      })`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+      field.tag.name,
+    ],
+  },
+  { // tag.Update
+    option: {
+      name: "Update",
+      value: "update",
+      description: "Update a tag for a location",
+    },
+    action: {
+      method: "PUT",
+      url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
+      body: `={{ { name: $parameter.f_tag_name } }}`,
+    },
+    output: {
+      name: "tag",
+      extract: "tag",
+      sanitizedFull: `({
+          id          : data.id ?? null,
+          name        : data.name ?? null,
+          locationId  : data.locationId ?? null,
+      })`,
+      sanitizedSimple: `({
+          id    : data.id ?? null,
+          name  : data.name ?? null,
+      })`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+      field.tag.id,
+      field.tag.name,
+    ],
+  },
+  { // tag.Delete
+    option: {
+      name: "Delete",
+      value: "delete",
+      description: "Delete a tag for a location",
+    },
+    action: {
+      method: "DELETE",
+      url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
+    },
+    output: {
+      name: "tag",
+      extract: "",
+      sanitizedFull: `data`,
+      sanitizedSimple: `data`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+      field.tag.id,
+    ],
+  },
+])
 
-
-
+export const task = createOperation("task", [
+  { // task.Get
+    option: {
+      name: "Get",
+      value: "get",
+      description: "Get a task by taskId",
+    },
+    action: {
+      method: "GET",
+      url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+    },
+    output: {
+      name: "task",
+      extract: "task",
+      sanitizedFull: `({
+          id          : data.id ?? null,
+          title       : data.title ?? null,
+          body        : data.body ?? null,
+          assignedTo  : data.assignedTo ?? null,
+          dueDate     : data.dueDate ?? null,
+          completed   : data.completed ?? null,
+          contactId   : data.contactId ?? null,
+      })`,
+      sanitizedSimple: `({
+          id    : data.id ?? null,
+          title : data.title ?? null,
+      })`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.contact.id,
+      field.task.id,
+    ],
+  },
+  { // task.GetMany
+    option: {
+      name: "Get Many",
+      value: "getMany",
+      description: "Get many tasks for a contact",
+    },
+    action: {
+      method: "GET",
+      url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
+    },
+    output: {
+      name: "task",
+      extract: "tasks",
+      sanitizedFull: `data.map((item) => ({
+          id          : item.id ?? null,
+          title       : item.title ?? null,
+          body        : item.body ?? null,
+          assignedTo  : item.assignedTo ?? null,
+          dueDate     : item.dueDate ?? null,
+          completed   : item.completed ?? null,
+          contactId   : item.contactId ?? null,
+      }))`,
+      sanitizedSimple: `data.map((item) => ({
+          id          : item.id ?? null,
+          title       : item.title ?? null,
+          completed   : item.completed ?? null,
+      }))`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.contact.id,
+    ],
+  },
+  { // task.Create
+    option: {
+      name: "Create",
+      value: "create",
+      description: "Create a new task for a contact",
+    },
+    action: {
+      method: "POST",
+      url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
+      body: `={{ {
+        title: $parameter.f_task_title,
+        body: $parameter.f_task_body || undefined,
+        dueDate: $parameter.f_task_dueDate,
+        completed: $parameter.f_task_completed,
+        assignedTo: $parameter.f_task_assignedTo || undefined
+      } }}`,
+    },
+    output: {
+      name: "task",
+      extract: "task",
+      sanitizedFull: `({
+          id          : data.id ?? null,
+          title       : data.title ?? null,
+          body        : data.body ?? null,
+          assignedTo  : data.assignedTo ?? null,
+          dueDate     : data.dueDate ?? null,
+          completed   : data.completed ?? null,
+          contactId   : data.contactId ?? null,
+      })`,
+      sanitizedSimple: `({
+          id    : data.id ?? null,
+          title : data.title ?? null,
+          completed : data.completed ?? null,
+      })`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.contact.id,
+      field.task.title,
+      field.task.dueDate,
+      field.task.completed,
+      field.task.body,
+      field.task.assignedTo,
+    ],
+  },
+  { // task.Update
+    option: {
+      name: "Update",
+      value: "update",
+      description: "Update a task for a contact",
+    },
+    action: {
+      method: "PUT",
+      url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+      body: `={{(() => {
+          const body = { ...$parameter.f_task_updateFields };
+          Object.keys(body).forEach((key) => {
+            if (body[key] === "") {
+              body[key] = null;
+            }
+          });
+          return body;
+      })()}}`,
+    },
+    output: {
+      name: "task",
+      extract: "task",
+      sanitizedFull: `({
+          id          : data.id ?? null,
+          title       : data.title ?? null,
+          body        : data.body ?? null,
+          assignedTo  : data.assignedTo ?? null,
+          dueDate     : data.dueDate ?? null,
+          completed   : data.completed ?? null,
+          contactId   : data.contactId ?? null,
+      })`,
+      sanitizedSimple: `({
+          id    : data.id ?? null,
+          title : data.title ?? null,
+          completed : data.completed ?? null,
+      })`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.contact.id,
+      field.task.id,
+      field.task.updateFields,
+    ],
+  },
+  { // task.Delete
+    option: {
+      name: "Delete",
+      value: "delete",
+      description: "Delete a task by taskId",
+    },
+    action: {
+      method: "DELETE",
+      url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+    },
+    output: {
+      name: "task",
+      extract: "",
+      sanitizedFull: `data`,
+      sanitizedSimple: `data`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.contact.id,
+      field.task.id,
+    ],
+  },
+])
