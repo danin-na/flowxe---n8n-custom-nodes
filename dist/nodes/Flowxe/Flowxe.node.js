@@ -44,7 +44,7 @@ class Flowxe {
             group: ['transform'],
             version: 1,
             usableAsTool: true,
-            subtitle: '={{$parameter["resource"] + " - " + $parameter["operation"]}}',
+            subtitle: '={{$parameter.resource + " " + $parameter.operation}}',
             description: 'GoHighLevel Declarative',
             defaults: { name: 'HighLevel' },
             inputs: ['main'],
@@ -53,14 +53,22 @@ class Flowxe {
                 baseURL: 'https://services.leadconnectorhq.com',
                 headers: {
                     Accept: 'application/json',
-                    Authorization: '={{"Bearer " + $parameter["field.common.auth.apiKey"]}}',
+                    Authorization: '={{"Bearer " + $parameter.f_common_apiKey}}',
                     Version: '2021-07-28',
                 },
             },
             properties: [
                 obj.resource,
+                obj.contact.operation,
+                ...obj.contact.fields,
                 obj.location.operation,
                 ...obj.location.fields,
+                obj.pipeline.operation,
+                ...obj.pipeline.fields,
+                obj.phoneNumber.operation,
+                ...obj.phoneNumber.fields,
+                obj.customField.operation,
+                ...obj.customField.fields,
             ],
         };
     }

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.location = exports.resource = void 0;
+exports.contact = exports.customField = exports.phoneNumber = exports.pipeline = exports.location = exports.resource = void 0;
 const field = {
     common: {
         apiKey: {
-            displayName: "API Key",
-            name: "field.common.auth.apiKey",
+            displayName: "API Keys",
+            name: "f_common_apiKey",
             type: "string",
             default: "",
             required: true,
@@ -14,7 +14,7 @@ const field = {
         },
         responseFormat: {
             displayName: "Response Format",
-            name: "field.common.responseFormat",
+            name: "f_common_responseFormat",
             type: "options",
             noDataExpression: true,
             default: "sanitizedSimple",
@@ -29,11 +29,188 @@ const field = {
     location: {
         id: {
             displayName: "Location ID",
-            name: "locationId",
+            name: "f_location_id",
             type: "string",
             default: "",
             required: true,
             description: "The ID of the location",
+        },
+    },
+    customField: {
+        mode: {
+            displayName: "Custom Field Type",
+            name: "f_customField_mode",
+            type: "options",
+            default: "all",
+            options: [
+                { name: "All", value: "all" },
+                { name: "Contact", value: "contact" },
+                { name: "Opportunity", value: "opportunity" },
+            ],
+            description: "Model of the custom field you want to retrieve",
+        },
+    },
+    contact: {
+        id: {
+            displayName: "Contact ID",
+            name: "f_contact_id",
+            type: "string",
+            default: "",
+            required: true,
+            description: "The ID of the contact",
+        },
+        updateFields: {
+            displayName: "Update Fields",
+            name: "f_contact_updateFields",
+            type: "collection",
+            placeholder: "Add Field",
+            default: {},
+            options: [
+                {
+                    displayName: "First Name",
+                    name: "firstName",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Last Name",
+                    name: "lastName",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Full Name",
+                    name: "name",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Email",
+                    name: "email",
+                    type: "string",
+                    placeholder: "name@email.com",
+                    default: "",
+                },
+                {
+                    displayName: "Phone",
+                    name: "phone",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Company Name",
+                    name: "companyName",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Address 1",
+                    name: "address1",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "City",
+                    name: "city",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "State",
+                    name: "state",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Postal Code",
+                    name: "postalCode",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Country",
+                    name: "country",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Timezone",
+                    name: "timezone",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Website",
+                    name: "website",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Source",
+                    name: "source",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "Date of Birth",
+                    name: "dateOfBirth",
+                    type: "string",
+                    default: "",
+                    description: "Format: YYYY-MM-DD",
+                },
+                {
+                    displayName: "Gender",
+                    name: "gender",
+                    type: "string",
+                    default: "",
+                },
+                {
+                    displayName: "DND",
+                    name: "dnd",
+                    type: "boolean",
+                    default: false,
+                },
+                {
+                    displayName: "Assigned To",
+                    name: "assignedTo",
+                    type: "string",
+                    default: "",
+                    description: "The user ID to whom the contact is assigned",
+                },
+                {
+                    displayName: "Custom Fields",
+                    name: "customFields",
+                    type: "fixedCollection",
+                    placeholder: "Add Custom Field",
+                    default: {},
+                    typeOptions: {
+                        multipleValues: true,
+                    },
+                    options: [
+                        {
+                            name: "customFieldValues",
+                            displayName: "Custom Field",
+                            values: [
+                                {
+                                    displayName: "Field ID",
+                                    name: "id",
+                                    type: "string",
+                                    default: "",
+                                    description: "The unique ID of the custom field",
+                                },
+                                {
+                                    displayName: "Value",
+                                    name: "value",
+                                    type: "string",
+                                    default: "",
+                                    description: "The value to set for the custom field",
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+            description: "Fields to update on the contact",
         },
     },
 };
@@ -82,16 +259,13 @@ function createOperation(name, definitions) {
                         postReceive: [{
                                 type: "set", properties: {
                                     value: `={{(() => {
-                            const mode = $parameter.outputFormat 
+                            const mode = $parameter.f_common_responseFormat
                             const body = $response.body
                             const data = $response.body.${out.extract} ?? {}
+                            if(mode === 'raw') return { rawResponse:body };
+                            if(mode === 'sanitizedFull') return { ${name}: ${out.sanitizedFull} }
+                            if(mode === 'sanitizedSimple') return { ${name}: ${out.sanitizedSimple} }
 
-                            let res = {}
-                            if(mode === 'raw') res = body
-                            if(mode === 'sanitizedFull') res = (${out.sanitizedFull})
-                            if(mode === 'sanitizedSimple') res = (${out.sanitizedSimple})
-
-                            return { ${name}: res };
                           })()}}`
                                 }
                             }]
@@ -116,12 +290,12 @@ exports.location = createOperation("location", [
     {
         option: {
             name: "Get",
-            value: "locationGet",
+            value: "get",
             description: "Get a location by locationId",
         },
         action: {
             method: "GET",
-            url: "=/locations/{{$parameter.locationId}}",
+            url: "=/locations/{{$parameter.f_location_id}}",
         },
         output: {
             extract: "location",
@@ -149,6 +323,239 @@ exports.location = createOperation("location", [
             field.common.responseFormat,
             field.common.apiKey,
             field.location.id,
+        ],
+    },
+]);
+exports.pipeline = createOperation("pipeline", [
+    {
+        option: {
+            name: "Get Many",
+            value: "getMany",
+            description: "Get Many pipelines for a location",
+        },
+        action: {
+            method: "GET",
+            url: "/opportunities/pipelines",
+            qs: {
+                locationId: "={{$parameter.f_location_id}}",
+            },
+        },
+        output: {
+            extract: "pipelines",
+            sanitizedFull: `data.map((item) => ({
+          id: item.id ?? null,
+          name: item.name ?? null,
+          stages: item.stages ?? [],
+          showInFunnel: item.showInFunnel ?? null,
+          showInChart: item.showInChart ?? null,
+      }))`,
+            sanitizedSimple: `data.map((item) => ({
+          id: item.id ?? null,
+          name: item.name ?? null,
+          stages: (item.stages ?? []).map((s) => ({
+            id: s.id ?? null,
+            name: s.name ?? null,
+          })),
+      }))`,
+        },
+        fields: [
+            field.common.responseFormat,
+            field.common.apiKey,
+            field.location.id,
+        ],
+    },
+]);
+exports.phoneNumber = createOperation("phoneNumber", [
+    {
+        option: {
+            name: "Get Many",
+            value: "getMany",
+            description: "Get Many phone numbers for a location",
+        },
+        action: {
+            method: "GET",
+            url: "=/phone-system/numbers/location/{{$parameter.f_location_id}}",
+        },
+        output: {
+            extract: "numbers",
+            sanitizedFull: `data.map((item) => ({
+          id          : item.sid ?? null,
+          phoneNumber : item.phoneNumber ?? null,
+          name        : item.friendlyName ?? null,
+          type        : item.type ?? null,
+          country : item.countryCode ?? null,
+          isDefault   : item.isDefaultNumber ?? null,
+          capabilities : item.capabilities ?? [],
+      }))`,
+            sanitizedSimple: `data.map((item) => ({
+          id          : item.sid ?? null,
+          phoneNumber : item.phoneNumber ?? null,
+          name        : item.friendlyName ?? null,
+      }))`,
+        },
+        fields: [
+            field.common.responseFormat,
+            field.common.apiKey,
+            field.location.id,
+        ],
+    },
+]);
+exports.customField = createOperation("customField", [
+    {
+        option: {
+            name: "Get Many",
+            value: "getMany",
+            description: "Get Many custom fields for a location",
+        },
+        action: {
+            method: "GET",
+            url: "=/locations/{{$parameter.f_location_id}}/customFields",
+            qs: {
+                model: "={{$parameter.f_customField_mode}}",
+            },
+        },
+        output: {
+            extract: "customFields",
+            sanitizedFull: `data.map((item) => ({
+          id          : item.id ?? null,
+          name        : item.name ?? null,
+          fieldKey    : item.fieldKey ?? null,
+          dataType    : item.dataType ?? null,
+          placeholder : item.placeholder ?? null,
+          locationId  : item.locationId ?? null,
+          model       : item.model ?? null,
+          position    : item.position ?? null,
+          documentType: item.documentType ?? null,
+          parentId    : item.parentId ?? null,
+          dateAdded   : item.dateAdded   ?? null,
+          standard    : item.standard    ?? null,
+      }))`,
+            sanitizedSimple: `data.map((item) => ({
+          id          : item.id ?? null,
+          name        : item.name ?? null,
+          fieldKey    : item.fieldKey ?? null,
+          model       : item.model ?? null,
+      }))`,
+        },
+        fields: [
+            field.common.responseFormat,
+            field.common.apiKey,
+            field.location.id,
+            field.customField.mode,
+        ],
+    },
+]);
+exports.contact = createOperation("contact", [
+    {
+        option: {
+            name: "Get",
+            value: "get",
+            description: "Get a contact by contactId",
+        },
+        action: {
+            method: "GET",
+            url: "=/contacts/{{$parameter.f_contact_id}}",
+        },
+        output: {
+            extract: "contact",
+            sanitizedFull: `({
+          id          : data.id ?? null,
+          locationId  : data.locationId ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          type        : data.type ?? null,
+          source      : data.source ?? null,
+          dateAdded   : data.dateAdded ?? null,
+          dateUpdated : data.dateUpdated ?? null,
+          tags        : data.tags ?? [],
+          customFields: data.customFields ?? [],
+          address1    : data.address1 ?? null,
+          city        : data.city ?? null,
+          state       : data.state ?? null,
+          country     : data.country ?? null,
+          postalCode  : data.postalCode ?? null,
+          timezone    : data.timezone ?? null,
+          companyName : data.companyName ?? null,
+      })`,
+            sanitizedSimple: `({
+          id          : data.id ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          customFields: data.customFields ?? [],
+      })`,
+        },
+        fields: [
+            field.common.responseFormat,
+            field.common.apiKey,
+            field.contact.id,
+        ],
+    },
+    {
+        option: {
+            name: "Update",
+            value: "update",
+            description: "Update a contact by contactId",
+        },
+        action: {
+            method: "PUT",
+            url: "=/contacts/{{$parameter.f_contact_id}}",
+            body: `={{(() => {
+          const body = { ...$parameter.f_contact_updateFields };
+          if (body.customFields && body.customFields.customFieldValues) {
+            body.customFields = body.customFields.customFieldValues.map((cf) => ({
+              ...cf,
+              value: cf.value === "" ? null : cf.value,
+            }));
+          }
+          Object.keys(body).forEach((key) => {
+            if (key !== "customFields" && body[key] === "") {
+              body[key] = null;
+            }
+          });
+          return body;
+      })()}}`,
+        },
+        output: {
+            extract: "contact",
+            sanitizedFull: `({
+          id          : data.id ?? null,
+          locationId  : data.locationId ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          type        : data.type ?? null,
+          source      : data.source ?? null,
+          dateAdded   : data.dateAdded ?? null,
+          dateUpdated : data.dateUpdated ?? null,
+          tags        : data.tags ?? [],
+          customFields: data.customFields ?? [],
+          address1    : data.address1 ?? null,
+          city        : data.city ?? null,
+          state       : data.state ?? null,
+          country     : data.country ?? null,
+          postalCode  : data.postalCode ?? null,
+          timezone    : data.timezone ?? null,
+          companyName : data.companyName ?? null,
+      })`,
+            sanitizedSimple: `({
+          id          : data.id ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          customFields: data.customFields ?? [],
+      })`,
+        },
+        fields: [
+            field.common.responseFormat,
+            field.common.apiKey,
+            field.contact.id,
+            field.contact.updateFields,
         ],
     },
 ]);

@@ -3,8 +3,8 @@ import type { INodeProperties } from "n8n-workflow"
 const field = {
   common: {
     apiKey: {
-      displayName: "API Key",
-      name: "field.common.auth.apiKey",
+      displayName: "API Keys",
+      name: "f_common_apiKey",
       type: "string",
       default: "",
       required: true,
@@ -13,7 +13,7 @@ const field = {
     } as INodeProperties,
     responseFormat: {
       displayName: "Response Format",
-      name: "field.common.responseFormat",
+      name: "f_common_responseFormat",
       type: "options",
       noDataExpression: true,
       default: "sanitizedSimple",
@@ -28,191 +28,192 @@ const field = {
   location: {
     id: {
       displayName: "Location ID",
-      name: "locationId",
+      name: "f_location_id",
       type: "string",
       default: "",
       required: true,
       description: "The ID of the location",
     } as INodeProperties,
   },
-}
-
-/*
-const field = {
-  common: {
-
-    date: {
-      due: {
-        displayName: "Due Date",
-        name: "field.common.date.due",
-        type: "string",
-        default: "",
-        description: "Due date (string, typically ISO 8601)",
-      } as n,
-    },
-    content: {
-      title: {
-        displayName: "Title",
-        name: "field.common.content.title",
-        type: "string",
-        default: "",
-        description: "Assign title to the object",
-      } as n,
-      message: {
-        displayName: "Message Body",
-        name: "field.common.content.message",
-        type: "string",
-        default: "",
-        required: true,
-        description: "Message body or content",
-      } as n,
-    },
-    input: {
-      emptyStringAsNull: {
-        displayName: "Pass Null To Clear Fields",
-        name: "field.common.input.emptyStringAsNull",
-        type: "boolean",
-        default: false,
-        description: "Whether to send empty string fields as null values to clear the fields from the record",
-      } as n,
-    },
-
-    status: {
-      completed: {
-        displayName: "Completed",
-        name: "field.common.status.completed",
-        type: "options",
-        noDataExpression: true,
-        default: "unset",
-        description: "Set task completion status (Unset will not send the field)",
-        options: [
-          { name: "Unset", value: "unset" },
-          { name: "True", value: "true" },
-          { name: "False", value: "false" },
-        ],
-      } as INodeProperties,
-    }
+  customField: {
+    mode: {
+      displayName: "Custom Field Type",
+      name: "f_customField_mode",
+      type: "options",
+      default: "all",
+      options: [
+        { name: "All", value: "all" },
+        { name: "Contact", value: "contact" },
+        { name: "Opportunity", value: "opportunity" },
+      ],
+      description: "Model of the custom field you want to retrieve",
+    } as INodeProperties,
   },
-  object: {
-    contact: {
-      id: {
-        displayName: "Contact ID",
-
-        name: "contactId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the contact",
-      } as INodeProperties,
-      fields: {
-        displayName: "Contact Fields",
-        name: "contactFields",
-        type: "collection",
-        default: {},
-        placeholder: "Add Field",
-        description: "The fields to update for the contact",
-        // eslint-disable-next-line n8n-nodes-base/node-param-collection-type-unsorted-items
-        options: [
-          { displayName: "First Name", name: "firstName", type: "string", default: "" },
-          { displayName: "Last Name", name: "lastName", type: "string", default: "" },
-          { displayName: "Email", name: "email", type: "string", default: "", placeholder: "" },
-          { displayName: "Phone", name: "phone", type: "string", default: "" },
-          { displayName: "Company Name", name: "companyName", type: "string", default: "" },
-          { displayName: "Address Line 1", name: "address1", type: "string", default: "" },
-          { displayName: "Address Line 2", name: "address2", type: "string", default: "" },
-          { displayName: "City", name: "city", type: "string", default: "" },
-          { displayName: "State", name: "state", type: "string", default: "" },
-          { displayName: "Postal Code", name: "postalCode", type: "string", default: "" },
-          { displayName: "Country", name: "country", type: "string", default: "" },
-          { displayName: "Website", name: "website", type: "string", default: "" },
-          { displayName: "Timezone", name: "timezone", type: "string", default: "" },
-          {
-            displayName: "Custom Fields",
-            name: "customFields",
-            type: "fixedCollection",
-            default: {},
-            typeOptions: { multipleValues: true },
-            options: [
-              {
-                name: "customField",
-                displayName: "Custom Field",
-                values: [
-                  { displayName: "Field ID", name: "id", type: "string", default: "", required: true },
-                  { displayName: "Value", name: "value", type: "string", default: "" },
-                ],
-              },
-            ],
+  contact: {
+    id: {
+      displayName: "Contact ID",
+      name: "f_contact_id",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The ID of the contact",
+    } as INodeProperties,
+    updateFields: {
+      displayName: "Update Fields",
+      name: "f_contact_updateFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      // eslint-disable-next-line n8n-nodes-base/node-param-collection-type-unsorted-items
+      options: [
+        {
+          displayName: "First Name",
+          name: "firstName",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Last Name",
+          name: "lastName",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Full Name",
+          name: "name",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Email",
+          name: "email",
+          type: "string",
+          placeholder: "name@email.com",
+          default: "",
+        },
+        {
+          displayName: "Phone",
+          name: "phone",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Company Name",
+          name: "companyName",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Address 1",
+          name: "address1",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "City",
+          name: "city",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "State",
+          name: "state",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Postal Code",
+          name: "postalCode",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Country",
+          name: "country",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Timezone",
+          name: "timezone",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Website",
+          name: "website",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Source",
+          name: "source",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "Date of Birth",
+          name: "dateOfBirth",
+          type: "string",
+          default: "",
+          description: "Format: YYYY-MM-DD",
+        },
+        {
+          displayName: "Gender",
+          name: "gender",
+          type: "string",
+          default: "",
+        },
+        {
+          displayName: "DND",
+          name: "dnd",
+          type: "boolean",
+          default: false,
+        },
+        {
+          displayName: "Assigned To",
+          name: "assignedTo",
+          type: "string",
+          default: "",
+          description: "The user ID to whom the contact is assigned",
+        },
+        {
+          displayName: "Custom Fields",
+          name: "customFields",
+          type: "fixedCollection",
+          placeholder: "Add Custom Field",
+          default: {},
+          typeOptions: {
+            multipleValues: true,
           },
-        ],
-      } as INodeProperties,
-    },
-    note: {
-      id: {
-        displayName: "Note ID",
-        name: "noteId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the note",
-      } as INodeProperties,
-    },
-    task: {
-      id: {
-        displayName: "Task ID",
-        name: "taskId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the task",
-      } as INodeProperties,
-    },
-    tag: {
-      tags: {
-        displayName: "Tags",
-        name: "tagTags",
-        type: "string",
-        default: "",
-        required: true,
-        description: "Comma-separated tags (e.g. vip, lead, booked)",
-      } as INodeProperties,
-    },
-    conversation: {
-      id: {
-        displayName: "Conversation ID",
-        name: "conversationId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the conversation",
-      } as INodeProperties,
-    },
-    user: {
-      id: {
-        displayName: "User ID",
-        name: "userId",
-        type: "string",
-        default: "",
-        description: "Assign this to a user with User ID",
-      } as INodeProperties,
-    },
-    customField: {
-      model: {
-        displayName: "Custom Fields Model",
-        name: "customFieldsModel",
-        type: "options",
-        noDataExpression: true,
-        default: "all",
-        description: "The model to which the custom field belongs",
-        options: [
-          { name: "All", value: "all" },
-          { name: "Contact", value: "contact" },
-          { name: "Opportunity", value: "opportunity" },
-        ],
-      } as INodeProperties,
-    }
-  }
+          options: [
+            {
+              name: "customFieldValues",
+              displayName: "Custom Field",
+              values: [
+                {
+                  displayName: "Field ID",
+                  name: "id",
+                  type: "string",
+                  default: "",
+                  description: "The unique ID of the custom field",
+                },
+                {
+                  displayName: "Value",
+                  name: "value",
+                  type: "string",
+                  default: "",
+                  description: "The value to set for the custom field",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      description: "Fields to update on the contact",
+    } as INodeProperties,
+  },
 }
-*/
 
 // ----------------------------------------------------------------------
 // Hepers - Recourse and Operation + Type
@@ -293,16 +294,13 @@ function createOperation(name: string, definitions: Operation[])
             postReceive: [{
               type: "set", properties: {
                 value: `={{(() => {
-                            const mode = $parameter.outputFormat 
+                            const mode = $parameter.f_common_responseFormat
                             const body = $response.body
                             const data = $response.body.${out.extract} ?? {}
+                            if(mode === 'raw') return { rawResponse:body };
+                            if(mode === 'sanitizedFull') return { ${name}: ${out.sanitizedFull} }
+                            if(mode === 'sanitizedSimple') return { ${name}: ${out.sanitizedSimple} }
 
-                            let res = {}
-                            if(mode === 'raw') res = body
-                            if(mode === 'sanitizedFull') res = (${out.sanitizedFull})
-                            if(mode === 'sanitizedSimple') res = (${out.sanitizedSimple})
-
-                            return { ${name}: res };
                           })()}}` }
             }]
           }
@@ -336,12 +334,12 @@ export const location = createOperation("location", [
   {// location.Get
     option: {
       name: "Get",
-      value: "locationGet",
+      value: "get",
       description: "Get a location by locationId",
     },
     action: {
       method: "GET",
-      url: "=/locations/{{$parameter.locationId}}",
+      url: "=/locations/{{$parameter.f_location_id}}",
     },
     output: {
       extract: "location",
@@ -372,226 +370,240 @@ export const location = createOperation("location", [
     ],
   },
 ])
-
-/*
+export const pipeline = createOperation("pipeline", [
+  {// pipeline.GetAll
+    option: {
+      name: "Get Many",
+      value: "getMany",
+      description: "Get Many pipelines for a location",
+    },
+    action: {
+      method: "GET",
+      url: "/opportunities/pipelines",
+      qs: {
+        locationId: "={{$parameter.f_location_id}}",
+      },
+    },
+    output: {
+      extract: "pipelines",
+      sanitizedFull: `data.map((item) => ({
+          id: item.id ?? null,
+          name: item.name ?? null,
+          stages: item.stages ?? [],
+          showInFunnel: item.showInFunnel ?? null,
+          showInChart: item.showInChart ?? null,
+      }))`,
+      sanitizedSimple: `data.map((item) => ({
+          id: item.id ?? null,
+          name: item.name ?? null,
+          stages: (item.stages ?? []).map((s) => ({
+            id: s.id ?? null,
+            name: s.name ?? null,
+          })),
+      }))`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+    ],
+  },
+])
+export const phoneNumber = createOperation("phoneNumber", [
+  { // phoneNumber.GetMany
+    option: {
+      name: "Get Many",
+      value: "getMany",
+      description: "Get Many phone numbers for a location",
+    },
+    action: {
+      method: "GET",
+      url: "=/phone-system/numbers/location/{{$parameter.f_location_id}}",
+    },
+    output: {
+      extract: "numbers",
+      sanitizedFull: `data.map((item) => ({
+          id          : item.sid ?? null,
+          phoneNumber : item.phoneNumber ?? null,
+          name        : item.friendlyName ?? null,
+          type        : item.type ?? null,
+          country : item.countryCode ?? null,
+          isDefault   : item.isDefaultNumber ?? null,
+          capabilities : item.capabilities ?? [],
+      }))`,
+      sanitizedSimple: `data.map((item) => ({
+          id          : item.sid ?? null,
+          phoneNumber : item.phoneNumber ?? null,
+          name        : item.friendlyName ?? null,
+      }))`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+    ],
+  },
+])
+export const customField = createOperation("customField", [
+  { // customField.GetMany
+    option: {
+      name: "Get Many",
+      value: "getMany",
+      description: "Get Many custom fields for a location",
+    },
+    action: {
+      method: "GET",
+      url: "=/locations/{{$parameter.f_location_id}}/customFields",
+      qs: {
+        model: "={{$parameter.f_customField_mode}}",
+      },
+    },
+    output: {
+      extract: "customFields",
+      sanitizedFull: `data.map((item) => ({
+          id          : item.id ?? null,
+          name        : item.name ?? null,
+          fieldKey    : item.fieldKey ?? null,
+          dataType    : item.dataType ?? null,
+          placeholder : item.placeholder ?? null,
+          locationId  : item.locationId ?? null,
+          model       : item.model ?? null,
+          position    : item.position ?? null,
+          documentType: item.documentType ?? null,
+          parentId    : item.parentId ?? null,
+          dateAdded   : item.dateAdded   ?? null,
+          standard    : item.standard    ?? null,
+      }))`,
+      sanitizedSimple: `data.map((item) => ({
+          id          : item.id ?? null,
+          name        : item.name ?? null,
+          fieldKey    : item.fieldKey ?? null,
+          model       : item.model ?? null,
+      }))`,
+    },
+    fields: [
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
+      field.customField.mode,
+    ],
+  },
+])
 export const contact = createOperation("contact", [
   { // contact.Get
     option: {
       name: "Get",
-      value: "contactGet",
+      value: "get",
       description: "Get a contact by contactId",
     },
     action: {
       method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}",
+      url: "=/contacts/{{$parameter.f_contact_id}}",
     },
     output: {
       extract: "contact",
       sanitizedFull: `({
-          id        : data.id ?? null,
-          firstName : data.firstName ?? null,
-          lastName  : data.lastName ?? null,
-          email     : data.email ?? null,
-          phone     : data.phone ?? null,
-          companyName: data.companyName ?? null,
-          website   : data.website ?? null,
-          timezone  : data.timezone ?? null,
-          address: {
-            line1   : data.address1 ?? null,
-            line2   : data.address2 ?? null,
-            city    : data.city ?? null,
-            state   : data.state ?? null,
-            postalCode : data.postalCode ?? null,
-            country : data.country ?? null,
-          },
+          id          : data.id ?? null,
+          locationId  : data.locationId ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          type        : data.type ?? null,
+          source      : data.source ?? null,
+          dateAdded   : data.dateAdded ?? null,
+          dateUpdated : data.dateUpdated ?? null,
+          tags        : data.tags ?? [],
           customFields: data.customFields ?? [],
+          address1    : data.address1 ?? null,
+          city        : data.city ?? null,
+          state       : data.state ?? null,
+          country     : data.country ?? null,
+          postalCode  : data.postalCode ?? null,
+          timezone    : data.timezone ?? null,
+          companyName : data.companyName ?? null,
       })`,
       sanitizedSimple: `({
-          id        : data.id ?? null,
-          firstName : data.firstName ?? null,
-          lastName  : data.lastName ?? null,
-          email     : data.email ?? null,
+          id          : data.id ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          customFields: data.customFields ?? [],
       })`,
     },
     fields: [
+      field.common.responseFormat,
       field.common.apiKey,
-      f.obj.contact.id,
-      f.cmn.output.format,
+      field.contact.id,
     ],
   },
   { // contact.Update
     option: {
       name: "Update",
-      value: "contactUpdate",
-      description: "Update a contact (Empty strings clear the field)",
+      value: "update",
+      description: "Update a contact by contactId",
     },
     action: {
       method: "PUT",
-      url: "=/contacts/{{$parameter.contactId}}",
+      url: "=/contacts/{{$parameter.f_contact_id}}",
       body: `={{(() => {
-    const data = $parameter.contactFields;
-    const body = {};
-
-    // List of standard fields available in the contactFields collection
-    const keys = [
-      'firstName', 'lastName', 'email', 'phone', 'companyName', 
-      'address1', 'address2', 'city', 'state', 'postalCode', 
-      'country', 'website', 'timezone'
-    ];
-
-    // Iterate over keys. If defined in parameters:
-    // Check if empty string -> send null (to clear). Otherwise send value.
-    keys.forEach((key) => {
-      if (data[key] !== undefined) {
-        body[key] = data[key] === '' ? null : data[key];
-      }
-    });
-
-    // Pass Custom Fields through if they exist
-    if (data.customFields && data.customFields.customField) {
-      body.customFields = data.customFields.customField;
-    }
-
-    return body;
-  })()}}`,
+          const body = { ...$parameter.f_contact_updateFields };
+          if (body.customFields && body.customFields.customFieldValues) {
+            body.customFields = body.customFields.customFieldValues.map((cf) => ({
+              ...cf,
+              value: cf.value === "" ? null : cf.value,
+            }));
+          }
+          Object.keys(body).forEach((key) => {
+            if (key !== "customFields" && body[key] === "") {
+              body[key] = null;
+            }
+          });
+          return body;
+      })()}}`,
     },
     output: {
       extract: "contact",
       sanitizedFull: `({
-          id        : data.id ?? null,
-          firstName : data.firstName ?? null,
-          lastName  : data.lastName ?? null,
-          email     : data.email ?? null,
-          phone     : data.phone ?? null,
-          companyName: data.companyName ?? null,
-          website   : data.website ?? null,
-          timezone  : data.timezone ?? null,
-          address: {
-            line1   : data.address1 ?? null,
-            line2   : data.address2 ?? null,
-            city    : data.city ?? null,
-            state   : data.state ?? null,
-            postalCode : data.postalCode ?? null,
-            country : data.country ?? null,
-          },
+          id          : data.id ?? null,
+          locationId  : data.locationId ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          type        : data.type ?? null,
+          source      : data.source ?? null,
+          dateAdded   : data.dateAdded ?? null,
+          dateUpdated : data.dateUpdated ?? null,
+          tags        : data.tags ?? [],
           customFields: data.customFields ?? [],
+          address1    : data.address1 ?? null,
+          city        : data.city ?? null,
+          state       : data.state ?? null,
+          country     : data.country ?? null,
+          postalCode  : data.postalCode ?? null,
+          timezone    : data.timezone ?? null,
+          companyName : data.companyName ?? null,
       })`,
       sanitizedSimple: `({
-          id        : data.id ?? null,
-          firstName : data.firstName ?? null,
-          lastName  : data.lastName ?? null,
-          email     : data.email ?? null,
+          id          : data.id ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          customFields: data.customFields ?? [],
       })`,
     },
     fields: [
+      field.common.responseFormat,
       field.common.apiKey,
-      f.obj.contact.id,
-      f.obj.contact.fields,
-      f.cmn.output.format,
+      field.contact.id,
+      field.contact.updateFields,
     ],
   },
 ])
 
 
 
-export const phoneNumber = createOperation("phoneNumber", [
-  {// phoneNumber.GetAll
-    option: {
-      name: "Get All",
-      value: "phoneNumberGetAll",
-      description: "Get all phone numbers by locationId",
-    },
-    action: {
-      method: "GET",
-      url: "=/phone-system/numbers/location/{{$parameter.locationId}}",
-    },
-    output: {
-      extract: "data",
-      sanitizedFull: `(Array.isArray(data) ? data.map(p => ({
-          id        : p.id ?? null,
-          name      : p.name ?? null,
-          number    : p.phone ?? null,
-          locationId: p.locationId ?? null,
-      })) : [])`,
-      sanitizedSimple: `(Array.isArray(data) ? data.map(p => ({
-          id        : p.id ?? null,
-          number    : p.phone ?? null,
-      })) : [])`,
-    },
-    fields: [
-      field.common.apiKey,
-      f.obj.location.id,
-      f.cmn.output.format
-    ],
-  },
-])
-export const pipeline = createOperation("pipeline", [
-  {// pipeline.GetAll
-    option: {
-      name: "Get All",
-      value: "pipelineGetAll",
-      description: "Get all pipelines by locationId",
-    },
-    action: {
-      method: "GET",
-      url: "=/opportunities/pipelines",
-      qs: { locationId: "={{$parameter.locationId}}" },
-    },
-    output: {
-      extract: "pipelines",
-      sanitizedFull: `(Array.isArray(data) ? data.map(p => ({
-          id        : p.id ?? null,
-          name      : p.name ?? null,
-          stages    : (p.stages ?? []).map(s => ({
-              id   : s.id ?? null,
-              name : s.name ?? null,
-          })),
-      })) : [])`,
-      sanitizedSimple: `(Array.isArray(data) ? data.map(p => ({
-          id        : p.id ?? null,
-          name      : p.name ?? null,
-      })) : [])`,
-    },
-    fields: [
-      field.common.apiKey,
-      f.obj.location.id,
-      f.cmn.output.format
-    ],
-  },
-])
-export const customField = createOperation("customField", [
-  {// customField.GetAll  
-    option: {
-      name: "Get All",
-      value: "customFieldGetAll",
-      description: "Get All custom fields by locationId",
-    },
-    action: {
-      method: "GET",
-      url: "=/locations/{{$parameter.locationId}}/customFields",
-      qs: { model: "={{$parameter.customFieldsModel}}" },
-    },
-    output: {
-      extract: "customFields",
-      sanitizedFull: `(Array.isArray(data) ? data.map(cf => ({
-          id        : cf.id ?? null,
-          name      : cf.name ?? null,
-          fieldKey  : cf.fieldKey ?? null,
-          dataType  : cf.dataType ?? null,
-          model     : cf.model ?? null,
-      })) : [])`,
-      sanitizedSimple: `(Array.isArray(data) ? data.map(cf => ({
-          id        : cf.id ?? null,
-          name      : cf.name ?? null,
-      })) : [])`,
-    },
-    fields: [
-      field.common.apiKey,
-      f.obj.location.id,
-      f.obj.customField.model,
-      f.cmn.output.format
-    ],
-  },
-])
 
-*/
