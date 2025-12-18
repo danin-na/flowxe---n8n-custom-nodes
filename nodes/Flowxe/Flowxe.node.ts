@@ -1,5 +1,5 @@
 import { INodeType, INodeTypeDescription } from 'n8n-workflow'
-import * as obj from './object'
+import * as obj from './objects'
 
 export class Flowxe implements INodeType
 {
@@ -27,7 +27,11 @@ export class Flowxe implements INodeType
 
 		properties: [
 			obj.resource,
-			...obj.contact,
+			//obj.contact.operation,
+			//...obj.contact.fields,
+			obj.location.operation,
+			...obj.location.fields,
+			/*
 			...obj.conversation,
 			...obj.location,
 			...obj.phoneNumber,
@@ -36,6 +40,7 @@ export class Flowxe implements INodeType
 			...obj.note,
 			...obj.tag,
 			...obj.task,
+			*/
 		],
 	};
 }

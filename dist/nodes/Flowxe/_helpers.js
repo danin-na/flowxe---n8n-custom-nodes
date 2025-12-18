@@ -4,7 +4,7 @@ exports.helpers = void 0;
 function makeOutput(spec) {
     var _a;
     return `={{(() => {
-		const mode    = $parameter.outputFormat ?? 'sanitizedSimple';
+		const mode    = $parameter.cmn_output_format ?? 'sanitizedSimple';
 		const op      = $parameter.operation;
 		const body    = $response.body ?? {};
 
@@ -375,6 +375,18 @@ exports.helpers = {
               }]
             : []
         )`,
+            }),
+            sendMessage: makeOutput({
+                op: 'conversationSendMessage',
+                key: 'message',
+                pre: `const d = body ?? {};`,
+                full: `d`,
+                simple: `({
+          id: d?.messageId ?? d?.id ?? null,
+          conversationId: d?.conversationId ?? null,
+          body: d?.body ?? d?.msg ?? null,
+          status: d?.status ?? null,
+        })`,
             }),
             delete: makeOutput({
                 op: 'conversationDelete',

@@ -9,7 +9,7 @@ type MakeSpec = {
 function makeOutput(spec: MakeSpec): string
 {
   return `={{(() => {
-		const mode    = $parameter.outputFormat ?? 'sanitizedSimple';
+		const mode    = $parameter.cmn_output_format ?? 'sanitizedSimple';
 		const op      = $parameter.operation;
 		const body    = $response.body ?? {};
 
@@ -382,6 +382,18 @@ export const helpers = {
               }]
             : []
         )`,
+      }),
+      sendMessage: makeOutput({
+        op: 'conversationSendMessage',
+        key: 'message',
+        pre: `const d = body ?? {};`, // Response is likely the message object directly or wrapped? Docs say "200" response. Usually returns the message object.
+        full: `d`,
+        simple: `({
+          id: d?.messageId ?? d?.id ?? null,
+          conversationId: d?.conversationId ?? null,
+          body: d?.body ?? d?.msg ?? null,
+          status: d?.status ?? null,
+        })`,
       }),
       delete: makeOutput({
         op: 'conversationDelete',

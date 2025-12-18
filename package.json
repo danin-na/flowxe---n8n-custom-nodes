@@ -4,8 +4,13 @@
   "description": "Flowxe Custom Nodes N8N",
   "license": "MIT",
   "homepage": "",
-  "keywords": ["n8n-community-node-package"],
-  "author": { "name": "danin", "email": "danin@flowxe.dev" },
+  "keywords": [
+    "n8n-community-node-package"
+  ],
+  "author": {
+    "name": "danin",
+    "email": "danin@flowxe.dev"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/danin-na/flowxe---n8n-custom-nodes.git"
@@ -19,19 +24,25 @@
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [],
-    "nodes": ["dist/nodes/Flowxe/Flowxe.node.ts"]
+    "nodes": [
+      "dist/nodes/Flowxe/Flowxe.node.ts"
+    ]
   },
   "devDependencies": {
     "@n8n/node-cli": "*",
-    "eslint": "9.32.0",
+    "eslint": "^9.32.0",
     "prettier": "3.6.2",
     "release-it": "^19.0.4",
     "typescript": "5.9.2"
   },
-  "peerDependencies": { "n8n-workflow": "*" }
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  }
 }

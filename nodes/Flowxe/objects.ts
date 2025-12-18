@@ -1,10 +1,11 @@
-import type { INodeProperties, INodePropertyOptions } from "n8n-workflow"
-import { helpers } from "./_helpers"
+import type { INodeProperties } from "n8n-workflow"
+
 
 // ----------------------------------------------------------------------
 // 1. Definitions
 // ----------------------------------------------------------------------
 
+/*
 const bodies = {
   note: `={{(() => {
     const body = { body: $parameter.contentMessage };
@@ -74,6 +75,7 @@ const bodies = {
     return body;
   })()}}`,
 }
+*/
 
 type n = INodeProperties
 
@@ -287,146 +289,214 @@ const f = {
 }
 
 // ----------------------------------------------------------------------
-// 2. RESOURCE BUILDER (Refactored)
+// Hepers - Recourse and Operation + Type
 // ----------------------------------------------------------------------
 
-function operation(
-  resourceName: string,
-  operations: {
-    action: {
-      name: string
-      value: string
-      description: string
-      method: "GET" | "POST" | "PUT" | "DELETE"
-      url: string
-      outputHelper: string
-      body?: string
-      qs?: Record<string, string>
-    }
-    // CHANGE: Now accepts the actual objects, not string keys
-    fields: INodeProperties[]
-  }[]
-): INodeProperties[]
+type Option = {
+  name: string
+  value: string
+  description: string
+}
+type Action = {
+  method: "GET" | "POST" | "PUT" | "DELETE"
+  url: string
+  body?: string
+  qs?: Record<string, string>
+}
+type Output = {
+  extract: string
+  sanitizedFull: string
+  sanitizedSimple: string
+}
+type Operation = {
+  option: Option
+  action: Action
+  output: Output
+  fields: INodeProperties[]
+}
+function createResource(): INodeProperties
 {
-  const n8nOperations: INodePropertyOptions[] = operations.map((op) => ({
-    name: op.action.name,
-    value: op.action.value,
-    action: op.action.name,
-    description: op.action.description,
-    routing: {
-      request: {
-        method: op.action.method,
-        url: op.action.url,
-        ...(op.action.qs && { qs: op.action.qs }),
-        ...(op.action.body && { body: op.action.body }),
-      },
-      output: {
-        postReceive: [{ type: "set", properties: { value: op.action.outputHelper } }],
-      },
-    },
-  }))
-
-  const operationField: INodeProperties = {
+  return {
+    displayName: "Resource",
+    name: "resource",
+    type: "options",
+    noDataExpression: true,
+    // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
+    options: [
+      { name: "Contact", value: "contact" },
+      { name: "Location", value: "location" },
+      { name: "Phone Number", value: "phoneNumber" },
+      { name: "Custom Field", value: "customField" },
+      { name: "Pipeline", value: "pipeline" },
+      { name: "Tag", value: "tag" },
+      { name: "Note", value: "note" },
+      { name: "Task", value: "task" },
+      { name: "Conversation", value: "conversation" },
+    ],
+    default: "contact",
+  }
+}
+function createOperation(name: string, definitions: Operation[])
+{
+  // 01 - create operation
+  const operation: INodeProperties = {
     displayName: "Operation",
     name: "operation",
     type: "options",
     noDataExpression: true,
-    displayOptions: { show: { resource: [resourceName] } },
+    displayOptions: { show: { resource: [name] } },
     default: "",
-    options: n8nOperations,
-  }
-
-  // Map stores the Actual Object -> List of Operations using it
-  const fieldUsage = new Map<INodeProperties, Set<string>>()
-
-  for (const op of operations)
-  {
-    for (const field of op.fields)
+    options: definitions.map(({ option: opt, action: act, output: out }) =>
     {
-      if (!fieldUsage.has(field))
-      {
-        fieldUsage.set(field, new Set())
+      // 02 - create option
+      return {
+        name: opt.name,
+        value: opt.value,
+        action: opt.name,
+        description: opt.description,
+        // 03 - create action
+        routing: {
+          request: {
+            method: act.method,
+            url: act.url,
+            ...(act.qs && { qs: act.qs }),
+            ...(act.body && { body: act.body }),
+          },
+          output: {
+            // 04 - create output
+            postReceive: [{
+              type: "set", properties: {
+                value: `={{(() => {
+                            const mode = $parameter.outputFormat 
+                            const body = $response.body
+                            const data = $response.body.${out.extract} ?? {}
+
+                            let res = {}
+                            if(mode === 'raw') res = body
+                            if(mode === 'sanitizedFull') res = (${out.sanitizedFull})
+                            if(mode === 'sanitizedSimple') res = (${out.sanitizedSimple})
+
+                            return { ${name}: res };
+                          })()}}` }
+            }]
+          }
+        }
       }
-      fieldUsage.get(field)!.add(op.action.value)
-    }
-  }
-
-  const fieldObjects: INodeProperties[] = []
-
-  for (const [fieldRef, operationSet] of fieldUsage.entries())
-  {
-    fieldObjects.push({
-      ...fieldRef, // Copy the definition
-      displayOptions: {
-        ...(fieldRef.displayOptions ?? {}),
-        show: {
-          resource: [resourceName],
-          operation: Array.from(operationSet),
-        },
-      },
     })
   }
 
-  return [operationField, ...fieldObjects]
+  // create fields
+  const fields = definitions.flatMap(def =>
+    def.fields.map((field) => ({
+      ...field,
+      displayOptions: {
+        show: {
+          resource: [name],
+          operation: [def.option.value],
+        },
+      },
+    }))
+  )
+
+  return { operation, fields }
 }
 
 // ----------------------------------------------------------------------
 // 3. EXPORTS
 // ----------------------------------------------------------------------
 
-export const resource: INodeProperties = {
-  displayName: "Resource",
-  name: "resource",
-  type: "options",
-  noDataExpression: true,
-  // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
-  options: [
-    { name: "Contact", value: "contact" },
-    { name: "Location", value: "location" },
-    { name: "Phone Number", value: "phoneNumber" },
-    { name: "Custom Field", value: "customField" },
-    { name: "Pipeline", value: "pipeline" },
-    { name: "Tag", value: "tag" },
-    { name: "Note", value: "note" },
-    { name: "Task", value: "task" },
-    { name: "Conversation", value: "conversation" },
-  ],
-  default: "contact",
-}
-export const contact = operation("contact", [
-  {// contact.Get
+export const resource = createResource()
+export const location = createOperation("location", [
+  {// location.Get
+    option: {
+      name: "Get",
+      value: "locationGet",
+      description: "Get a location by locationId",
+    },
     action: {
+      method: "GET",
+      url: "=/locations/{{$parameter.locationId}}",
+    },
+    output: {
+      extract: "location",
+      sanitizedFull: `({
+          id        : data.id ?? null,
+          name      : data.name ?? null,
+          website   : data.website ?? null,
+          timezone  : data.timezone ?? null,
+          email     : data.email ?? null,
+          phone     : data.phone ?? null,
+          address: {
+            line1   : data.address ?? null,
+            city    : data.city ?? null,
+            state   : data.state ?? null,
+            zipCode : data.postalCode ?? null,
+            country : data.country ?? null,
+          },
+      })`,
+      sanitizedSimple: `({
+          id        : data.id ?? null,
+          name      : data.name ?? null,
+      })`,
+    },
+    fields: [
+      f.cmn.auth.apiKey,
+      f.obj.location.id,
+      f.cmn.output.format
+    ],
+
+  },
+])
+
+
+/*
+export const contact = createResource("contact", [
+  { // contact.Get
+    option: {
       name: "Get",
       value: "contactGet",
       description: "Get a contact by contactId",
+    },
+    action: {
       method: "GET",
       url: "=/contacts/{{$parameter.contactId}}",
-      outputHelper: helpers.output.contact.get,
     },
     fields: [
       f.cmn.auth.apiKey,
       f.obj.contact.id,
-      f.cmn.output.format
+      f.cmn.output.format,
     ],
+    output: {
+      postReceive: helpers.output.contact.get,
+    },
   },
-  {// contact.Update
-    action: {
+  { // contact.Update
+    option: {
       name: "Update",
       value: "contactUpdate",
       description: "Update a contact (Empty strings clear the field)",
+    },
+    action: {
       method: "PUT",
       url: "=/contacts/{{$parameter.contactId}}",
       body: bodies.contactUpdate,
-      outputHelper: helpers.output.contact.update,
     },
     fields: [
       f.cmn.auth.apiKey,
       f.obj.contact.id,
       f.obj.contact.fields,
-      f.cmn.output.format
+      f.cmn.output.format,
     ],
+    output: {
+      postReceive: helpers.output.contact.update,
+    },
   },
 ])
+*/
+
+
+
+/* OLD CODE - WRONG, DOES NOT WORK
 export const conversation = operation("conversation", [
   {// conversation.Delete
     action: {
@@ -482,23 +552,7 @@ export const conversation = operation("conversation", [
     ],
   },
 ])
-export const location = operation("location", [
-  {// location.Get
-    action: {
-      name: "Get",
-      value: "locationGet",
-      description: "Get a location by locationId",
-      method: "GET",
-      url: "=/locations/{{$parameter.locationId}}",
-      outputHelper: helpers.output.location.get,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.location.id,
-      f.cmn.output.format
-    ],
-  },
-])
+
 export const phoneNumber = operation("phoneNumber", [
   {// phoneNumber.GetAll
     action: {
@@ -766,4 +820,4 @@ export const task = operation("task", [
     ],
   },
 ])
-
+*/

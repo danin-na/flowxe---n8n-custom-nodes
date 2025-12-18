@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Flowxe = void 0;
-const obj = __importStar(require("./object"));
+const obj = __importStar(require("./objects"));
 class Flowxe {
     constructor() {
         this.description = {
@@ -59,15 +59,8 @@ class Flowxe {
             },
             properties: [
                 obj.resource,
-                ...obj.contact,
-                ...obj.conversation,
-                ...obj.location,
-                ...obj.phoneNumber,
-                ...obj.pipeline,
-                ...obj.customField,
-                ...obj.note,
-                ...obj.tag,
-                ...obj.task,
+                obj.location.operation,
+                ...obj.location.fields,
             ],
         };
     }

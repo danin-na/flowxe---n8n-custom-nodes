@@ -37,6 +37,7 @@ export declare const helpers: {
         readonly conversation: {
             readonly search: string;
             readonly create: string;
+            readonly sendMessage: string;
             readonly delete: string;
         };
     };
