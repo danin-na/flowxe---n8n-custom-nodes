@@ -1,101 +1,50 @@
 import type { INodeProperties } from "n8n-workflow"
 
-
-// ----------------------------------------------------------------------
-// 1. Definitions
-// ----------------------------------------------------------------------
+const field = {
+  common: {
+    apiKey: {
+      displayName: "API Key",
+      name: "field.common.auth.apiKey",
+      type: "string",
+      default: "",
+      required: true,
+      typeOptions: { password: true },
+      description: "Private Integration Token (Authorization: Bearer ...)",
+    } as INodeProperties,
+    responseFormat: {
+      displayName: "Response Format",
+      name: "field.common.responseFormat",
+      type: "options",
+      noDataExpression: true,
+      default: "sanitizedSimple",
+      description: "RAW returns the full API response. Sanitized returns a cleaned object output.",
+      options: [
+        { name: "Debug Mode (RAW)", value: "raw" },
+        { name: "Sanitized Full", value: "sanitizedFull" },
+        { name: "Sanitized Simple", value: "sanitizedSimple" },
+      ],
+    } as INodeProperties,
+  },
+  location: {
+    id: {
+      displayName: "Location ID",
+      name: "locationId",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The ID of the location",
+    } as INodeProperties,
+  },
+}
 
 /*
-const bodies = {
-  note: `={{(() => {
-    const body = { body: $parameter.contentMessage };
-    const userId = $parameter.userId;
-    if (userId !== undefined && userId !== '') body.userId = userId;
-    return body;
-  })()}}`,
-  task: `={{(() => {
-    const body = {};
-    const title = $parameter.contentTitle;
-    const message = $parameter.contentMessage;
-    const dueDate = $parameter.taskDueDate;
-    const completed = $parameter.taskCompleted;
-    const userId = $parameter.userId;
+const field = {
+  common: {
 
-    if (title !== undefined && title !== '') body.title = title;
-    if (message !== undefined && message !== '') body.body = message;
-    if (dueDate !== undefined && dueDate !== '') body.dueDate = dueDate;
-    if (userId !== undefined && userId !== '') body.assignedTo = userId;
-
-    if (completed !== undefined && completed !== '' && completed !== 'unset') {
-      body.completed = completed === 'true';
-    }
-    return body;
-  })()}}`,
-  tag: `={{(() => {
-    const tags = ($parameter.tagTags ?? '')
-      .split(',')
-      .map((t) => t.trim())
-      .filter((t) => t !== '');
-    return { tags };
-  })()}}`,
-  conversation: `={{(() => {
-    const body = {};
-    const locationId = $parameter.locationId;
-    const contactId = $parameter.contactId;
-
-    if (locationId !== undefined && locationId !== '') body.locationId = locationId;
-    if (contactId !== undefined && contactId !== '') body.contactId = contactId;
-    
-    return body;
-  })()}}`,
-  contactUpdate: `={{(() => {
-    const data = $parameter.contactFields;
-    const body = {};
-
-    // List of standard fields available in the contactFields collection
-    const keys = [
-      'firstName', 'lastName', 'email', 'phone', 'companyName', 
-      'address1', 'address2', 'city', 'state', 'postalCode', 
-      'country', 'website', 'timezone'
-    ];
-
-    // Iterate over keys. If defined in parameters:
-    // Check if empty string -> send null (to clear). Otherwise send value.
-    keys.forEach((key) => {
-      if (data[key] !== undefined) {
-        body[key] = data[key] === '' ? null : data[key];
-      }
-    });
-
-    // Pass Custom Fields through if they exist
-    if (data.customFields && data.customFields.customField) {
-      body.customFields = data.customFields.customField;
-    }
-
-    return body;
-  })()}}`,
-}
-*/
-
-type n = INodeProperties
-
-const f = {
-  cmn: {
-    auth: {
-      apiKey: {
-        displayName: "API Key",
-        name: "apiKey",
-        type: "string",
-        default: "",
-        required: true,
-        typeOptions: { password: true },
-        description: "Private Integration Token (Authorization: Bearer ...)",
-      } as n,
-    },
     date: {
       due: {
         displayName: "Due Date",
-        name: "taskDueDate",
+        name: "field.common.date.due",
         type: "string",
         default: "",
         description: "Due date (string, typically ISO 8601)",
@@ -104,14 +53,14 @@ const f = {
     content: {
       title: {
         displayName: "Title",
-        name: "contentTitle",
+        name: "field.common.content.title",
         type: "string",
         default: "",
         description: "Assign title to the object",
       } as n,
       message: {
         displayName: "Message Body",
-        name: "contentMessage",
+        name: "field.common.content.message",
         type: "string",
         default: "",
         required: true,
@@ -121,31 +70,17 @@ const f = {
     input: {
       emptyStringAsNull: {
         displayName: "Pass Null To Clear Fields",
-        name: "emptyStringAsNull",
+        name: "field.common.input.emptyStringAsNull",
         type: "boolean",
         default: false,
         description: "Whether to send empty string fields as null values to clear the fields from the record",
       } as n,
     },
-    output: {
-      format: {
-        displayName: "Output Format",
-        name: "outputFormat",
-        type: "options",
-        noDataExpression: true,
-        default: "sanitizedSimple",
-        description: "RAW returns the full API response. Sanitized returns a cleaned object output.",
-        options: [
-          { name: "Debug Mode (RAW)", value: "raw" },
-          { name: "Sanitized Full", value: "sanitizedFull" },
-          { name: "Sanitized Simple", value: "sanitizedSimple" },
-        ],
-      } as n,
-    },
+
     status: {
       completed: {
         displayName: "Completed",
-        name: "taskCompleted",
+        name: "field.common.status.completed",
         type: "options",
         noDataExpression: true,
         default: "unset",
@@ -158,17 +93,7 @@ const f = {
       } as INodeProperties,
     }
   },
-  obj: {
-    location: {
-      id: {
-        displayName: "Location ID",
-        name: "locationId",
-        type: "string",
-        default: "",
-        required: true,
-        description: "The ID of the location",
-      } as INodeProperties,
-    },
+  object: {
     contact: {
       id: {
         displayName: "Contact ID",
@@ -287,6 +212,7 @@ const f = {
     }
   }
 }
+*/
 
 // ----------------------------------------------------------------------
 // Hepers - Recourse and Operation + Type
@@ -440,17 +366,15 @@ export const location = createOperation("location", [
       })`,
     },
     fields: [
-      f.cmn.auth.apiKey,
-      f.obj.location.id,
-      f.cmn.output.format
+      field.common.responseFormat,
+      field.common.apiKey,
+      field.location.id,
     ],
-
   },
 ])
 
-
 /*
-export const contact = createResource("contact", [
+export const contact = createOperation("contact", [
   { // contact.Get
     option: {
       name: "Get",
@@ -461,14 +385,39 @@ export const contact = createResource("contact", [
       method: "GET",
       url: "=/contacts/{{$parameter.contactId}}",
     },
+    output: {
+      extract: "contact",
+      sanitizedFull: `({
+          id        : data.id ?? null,
+          firstName : data.firstName ?? null,
+          lastName  : data.lastName ?? null,
+          email     : data.email ?? null,
+          phone     : data.phone ?? null,
+          companyName: data.companyName ?? null,
+          website   : data.website ?? null,
+          timezone  : data.timezone ?? null,
+          address: {
+            line1   : data.address1 ?? null,
+            line2   : data.address2 ?? null,
+            city    : data.city ?? null,
+            state   : data.state ?? null,
+            postalCode : data.postalCode ?? null,
+            country : data.country ?? null,
+          },
+          customFields: data.customFields ?? [],
+      })`,
+      sanitizedSimple: `({
+          id        : data.id ?? null,
+          firstName : data.firstName ?? null,
+          lastName  : data.lastName ?? null,
+          email     : data.email ?? null,
+      })`,
+    },
     fields: [
-      f.cmn.auth.apiKey,
+      field.common.apiKey,
       f.obj.contact.id,
       f.cmn.output.format,
     ],
-    output: {
-      postReceive: helpers.output.contact.get,
-    },
   },
   { // contact.Update
     option: {
@@ -479,345 +428,170 @@ export const contact = createResource("contact", [
     action: {
       method: "PUT",
       url: "=/contacts/{{$parameter.contactId}}",
-      body: bodies.contactUpdate,
+      body: `={{(() => {
+    const data = $parameter.contactFields;
+    const body = {};
+
+    // List of standard fields available in the contactFields collection
+    const keys = [
+      'firstName', 'lastName', 'email', 'phone', 'companyName', 
+      'address1', 'address2', 'city', 'state', 'postalCode', 
+      'country', 'website', 'timezone'
+    ];
+
+    // Iterate over keys. If defined in parameters:
+    // Check if empty string -> send null (to clear). Otherwise send value.
+    keys.forEach((key) => {
+      if (data[key] !== undefined) {
+        body[key] = data[key] === '' ? null : data[key];
+      }
+    });
+
+    // Pass Custom Fields through if they exist
+    if (data.customFields && data.customFields.customField) {
+      body.customFields = data.customFields.customField;
+    }
+
+    return body;
+  })()}}`,
+    },
+    output: {
+      extract: "contact",
+      sanitizedFull: `({
+          id        : data.id ?? null,
+          firstName : data.firstName ?? null,
+          lastName  : data.lastName ?? null,
+          email     : data.email ?? null,
+          phone     : data.phone ?? null,
+          companyName: data.companyName ?? null,
+          website   : data.website ?? null,
+          timezone  : data.timezone ?? null,
+          address: {
+            line1   : data.address1 ?? null,
+            line2   : data.address2 ?? null,
+            city    : data.city ?? null,
+            state   : data.state ?? null,
+            postalCode : data.postalCode ?? null,
+            country : data.country ?? null,
+          },
+          customFields: data.customFields ?? [],
+      })`,
+      sanitizedSimple: `({
+          id        : data.id ?? null,
+          firstName : data.firstName ?? null,
+          lastName  : data.lastName ?? null,
+          email     : data.email ?? null,
+      })`,
     },
     fields: [
-      f.cmn.auth.apiKey,
+      field.common.apiKey,
       f.obj.contact.id,
       f.obj.contact.fields,
       f.cmn.output.format,
     ],
-    output: {
-      postReceive: helpers.output.contact.update,
-    },
-  },
-])
-*/
-
-
-
-/* OLD CODE - WRONG, DOES NOT WORK
-export const conversation = operation("conversation", [
-  {// conversation.Delete
-    action: {
-      name: "Delete",
-      value: "conversationDelete",
-      description: "Delete a conversation by conversationId",
-      method: "DELETE",
-      url: "=/conversations/{{$parameter.conversationId}}",
-      outputHelper: helpers.output.conversation.delete,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.conversation.id,
-      f.cmn.output.format
-    ],
-  },
-  {// conversation.Search
-    action: {
-      name: "Search",
-      value: "conversationSearch",
-      description: "Search for conversations (params in body)",
-      method: "GET",
-      url: "=/conversations/search",
-      qs: {
-        locationId: "={{$parameter.locationId}}",
-        contactId: "={{$parameter.contactId}}",
-      },
-      body: bodies.conversation,
-      outputHelper: helpers.output.conversation.search,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.location.id,
-      f.obj.contact.id,
-      f.cmn.output.format
-    ],
-  },
-  {// conversation.Create
-    action: {
-      name: "Create",
-      value: "conversationCreate",
-      description: "Create a new conversation",
-      method: "POST",
-      url: "=/conversations/",
-      body: bodies.conversation,
-      outputHelper: helpers.output.conversation.create,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.location.id,
-      f.obj.contact.id,
-      f.cmn.output.format
-    ],
   },
 ])
 
-export const phoneNumber = operation("phoneNumber", [
+
+
+export const phoneNumber = createOperation("phoneNumber", [
   {// phoneNumber.GetAll
-    action: {
+    option: {
       name: "Get All",
       value: "phoneNumberGetAll",
       description: "Get all phone numbers by locationId",
+    },
+    action: {
       method: "GET",
       url: "=/phone-system/numbers/location/{{$parameter.locationId}}",
-      outputHelper: helpers.output.phoneNumber.getAll,
+    },
+    output: {
+      extract: "data",
+      sanitizedFull: `(Array.isArray(data) ? data.map(p => ({
+          id        : p.id ?? null,
+          name      : p.name ?? null,
+          number    : p.phone ?? null,
+          locationId: p.locationId ?? null,
+      })) : [])`,
+      sanitizedSimple: `(Array.isArray(data) ? data.map(p => ({
+          id        : p.id ?? null,
+          number    : p.phone ?? null,
+      })) : [])`,
     },
     fields: [
-      f.cmn.auth.apiKey,
+      field.common.apiKey,
       f.obj.location.id,
       f.cmn.output.format
     ],
   },
 ])
-export const pipeline = operation("pipeline", [
+export const pipeline = createOperation("pipeline", [
   {// pipeline.GetAll
-    action: {
+    option: {
       name: "Get All",
       value: "pipelineGetAll",
       description: "Get all pipelines by locationId",
+    },
+    action: {
       method: "GET",
-      url: "=/opportunities/pipelines?locationId={{$parameter.locationId}}",
-      outputHelper: helpers.output.pipeline.getAll,
+      url: "=/opportunities/pipelines",
+      qs: { locationId: "={{$parameter.locationId}}" },
+    },
+    output: {
+      extract: "pipelines",
+      sanitizedFull: `(Array.isArray(data) ? data.map(p => ({
+          id        : p.id ?? null,
+          name      : p.name ?? null,
+          stages    : (p.stages ?? []).map(s => ({
+              id   : s.id ?? null,
+              name : s.name ?? null,
+          })),
+      })) : [])`,
+      sanitizedSimple: `(Array.isArray(data) ? data.map(p => ({
+          id        : p.id ?? null,
+          name      : p.name ?? null,
+      })) : [])`,
     },
     fields: [
-      f.cmn.auth.apiKey,
+      field.common.apiKey,
       f.obj.location.id,
       f.cmn.output.format
     ],
   },
 ])
-export const customField = operation("customField", [
+export const customField = createOperation("customField", [
   {// customField.GetAll  
-    action: {
+    option: {
       name: "Get All",
       value: "customFieldGetAll",
       description: "Get All custom fields by locationId",
+    },
+    action: {
       method: "GET",
       url: "=/locations/{{$parameter.locationId}}/customFields",
       qs: { model: "={{$parameter.customFieldsModel}}" },
-      outputHelper: helpers.output.customField.getAll,
+    },
+    output: {
+      extract: "customFields",
+      sanitizedFull: `(Array.isArray(data) ? data.map(cf => ({
+          id        : cf.id ?? null,
+          name      : cf.name ?? null,
+          fieldKey  : cf.fieldKey ?? null,
+          dataType  : cf.dataType ?? null,
+          model     : cf.model ?? null,
+      })) : [])`,
+      sanitizedSimple: `(Array.isArray(data) ? data.map(cf => ({
+          id        : cf.id ?? null,
+          name      : cf.name ?? null,
+      })) : [])`,
     },
     fields: [
-      f.cmn.auth.apiKey,
+      field.common.apiKey,
       f.obj.location.id,
       f.obj.customField.model,
       f.cmn.output.format
     ],
   },
 ])
-export const tag = operation("tag", [
-  {// tag.Add
-    action: {
-      name: "Add",
-      value: "tagAdd",
-      description: "Add tags to a contact by contactId",
-      method: "POST",
-      url: "=/contacts/{{$parameter.contactId}}/tags",
-      body: bodies.tag,
-      outputHelper: helpers.output.tag.add,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.tag.tags,
-      f.cmn.output.format
-    ],
-  },
-  {// tag.Remove
-    action: {
-      name: "Remove",
-      value: "tagRemove",
-      description: "Remove tags from a contact by contactId",
-      method: "DELETE",
-      url: "=/contacts/{{$parameter.contactId}}/tags",
-      body: bodies.tag,
-      outputHelper: helpers.output.tag.remove,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.tag.tags,
-      f.cmn.output.format
-    ],
-  },
-])
-export const note = operation("note", [
-  {// note.Get
-    action: {
-      name: "Get",
-      value: "noteGet",
-      description: "Get a note by contactId + noteId",
-      method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
-      outputHelper: helpers.output.note.get,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.note.id,
-      f.cmn.output.format
-    ],
-  },
-  {// note.GetAll     
-    action: {
-      name: "Get All",
-      value: "noteGetAll",
-      description: "Get All notes for a contact by contactId",
-      method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}/notes",
-      outputHelper: helpers.output.note.getAll,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.cmn.output.format
-    ],
-  },
-  {// note.Create 
-    action: {
-      name: "Create",
-      value: "noteCreate",
-      description: "Create a note for a contact by contactId",
-      method: "POST",
-      url: "=/contacts/{{$parameter.contactId}}/notes",
-      body: bodies.note,
-      outputHelper: helpers.output.note.create,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.cmn.content.message,
-      f.obj.user.id,
-      f.cmn.output.format
-    ],
-  },
-  {// note.Update
-    action: {
-      name: "Update",
-      value: "noteUpdate",
-      description: "Update a note by contactId + noteId",
-      method: "PUT",
-      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
-      body: bodies.note,
-      outputHelper: helpers.output.note.update,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.note.id,
-      f.cmn.content.message,
-      f.obj.user.id,
-      f.cmn.output.format
-    ],
-  },
-  {// note.Delete
-    action: {
-      name: "Delete",
-      value: "noteDelete",
-      description: "Delete a note by contactId + noteId",
-      method: "DELETE",
-      url: "=/contacts/{{$parameter.contactId}}/notes/{{$parameter.noteId}}",
-      outputHelper: helpers.output.note.delete,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.note.id,
-      f.cmn.output.format
-    ],
-  },
-])
-export const task = operation("task", [
-  {// task.Get
-    action: {
-      name: "Get",
-      value: "taskGet",
-      description: "Get a task by contactId + taskId",
-      method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}/tasks/{{$parameter.taskId}}",
-      outputHelper: helpers.output.task.get,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.task.id,
-      f.cmn.output.format
-    ],
-  },
-  {// task.GetAll
-    action: {
-      name: "Get All",
-      value: "taskGetAll",
-      description: "Get all tasks for a contact by contactId",
-      method: "GET",
-      url: "=/contacts/{{$parameter.contactId}}/tasks",
-      outputHelper: helpers.output.task.getAll,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.cmn.output.format
-    ],
-  },
-  {// task.Create
-    action: {
-      name: "Create",
-      value: "taskCreate",
-      description: "Create a task for a contact by contactId",
-      method: "POST",
-      url: "=/contacts/{{$parameter.contactId}}/tasks",
-      body: bodies.task,
-      outputHelper: helpers.output.task.create,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.cmn.content.title,
-      f.cmn.content.message,
-      f.cmn.date.due,
-      f.cmn.status.completed,
-      f.obj.user.id,
-      f.cmn.output.format,
-    ],
-  },
-  {// task.Update
-    action: {
-      name: "Update",
-      value: "taskUpdate",
-      description: "Update a task by contactId + taskId",
-      method: "PUT",
-      url: "=/contacts/{{$parameter.contactId}}/tasks/{{$parameter.taskId}}",
-      body: bodies.task,
-      outputHelper: helpers.output.task.update,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.task.id,
-      f.cmn.content.title,
-      f.cmn.content.message,
-      f.cmn.date.due,
-      f.cmn.status.completed,
-      f.obj.user.id,
-      f.cmn.output.format,
-    ],
-  },
-  {// task.Delete
-    action: {
-      name: "Delete",
-      value: "taskDelete",
-      description: "Delete a task by contactId + taskId",
-      method: "DELETE",
-      url: "=/contacts/{{$parameter.contactId}}/tasks/{{$parameter.taskId}}",
-      outputHelper: helpers.output.task.delete,
-    },
-    fields: [
-      f.cmn.auth.apiKey,
-      f.obj.contact.id,
-      f.obj.task.id,
-      f.cmn.output.format
-    ],
-  },
-])
+
 */

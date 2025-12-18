@@ -20,7 +20,7 @@ export class Flowxe implements INodeType
 			baseURL: 'https://services.leadconnectorhq.com',
 			headers: {
 				Accept: 'application/json',
-				Authorization: '={{"Bearer " + $parameter.apiKey}}',
+				Authorization: '={{"Bearer " + $parameter["field.common.auth.apiKey"]}}',
 				Version: '2021-07-28',
 			},
 		},
