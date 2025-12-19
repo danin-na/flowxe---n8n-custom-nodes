@@ -40,6 +40,8 @@ class Flowxe {
                 ...objects_1.data.tag.fields,
                 objects_1.data.note.operation,
                 ...objects_1.data.note.fields,
+                objects_1.data.task.operation,
+                ...objects_1.data.task.fields,
             ],
         };
     }

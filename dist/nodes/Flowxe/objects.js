@@ -349,6 +349,66 @@ const field = {
             routing: { send: { type: "body", property: "body" } },
         },
     },
+    task: {
+        id: {
+            displayName: "Task ID",
+            name: "f_task_id",
+            type: "string",
+            default: "",
+            required: true,
+            description: "The ID of the task",
+        },
+        updateFields: {
+            displayName: "Task Fields",
+            name: "f_task_updateFields",
+            type: "collection",
+            placeholder: "Add Field",
+            default: {},
+            options: [
+                {
+                    displayName: "Title",
+                    name: "title",
+                    type: "string",
+                    default: "",
+                    description: "The title of the task",
+                    routing: { send: { type: "body", property: "title" } },
+                },
+                {
+                    displayName: "Body",
+                    name: "body",
+                    type: "string",
+                    default: "",
+                    description: "The description/body of the task",
+                    routing: { send: { type: "body", property: "body" } },
+                },
+                {
+                    displayName: "Due Date",
+                    name: "dueDate",
+                    type: "dateTime",
+                    default: "",
+                    description: "The due date of the task. Format: ISO 8601",
+                    routing: { send: { type: "body", property: "dueDate" } },
+                },
+                {
+                    displayName: "Assigned To",
+                    name: "assignedTo",
+                    type: "string",
+                    default: "",
+                    description: "The ID of the user the task is assigned to",
+                    routing: { send: { type: "body", property: "assignedTo" } },
+                },
+                {
+                    displayName: "Completed",
+                    name: "completed",
+                    type: "boolean",
+                    default: false,
+                    description: "Whether the task is completed",
+                    routing: { send: { type: "body", property: "completed" } },
+                },
+            ],
+            description: "Fields to update on the task",
+        },
+    },
 };
 exports.data = {
     resource: createResource(),
@@ -790,6 +850,113 @@ exports.data = {
                 field.note.id,
             ],
         },
-    ])
+    ]),
+    task: createOperation("task", [
+        {
+            option: {
+                name: "get",
+                description: "Get a Task by taskId",
+            },
+            action: {
+                method: "GET",
+                url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+            },
+            output: {
+                name: "task",
+                extract: "task",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.contact.id,
+                field.task.id,
+            ],
+        },
+        {
+            option: {
+                name: "get many",
+                description: "Get many Tasks by contactId",
+            },
+            action: {
+                method: "GET",
+                url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
+            },
+            output: {
+                name: "task",
+                extract: "tasks",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.contact.id,
+            ],
+        },
+        {
+            option: {
+                name: "create",
+                description: "Create a Task by contactId",
+            },
+            action: {
+                method: "POST",
+                url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
+            },
+            output: {
+                name: "task",
+                extract: "task",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.contact.id,
+                field.task.updateFields,
+            ],
+        },
+        {
+            option: {
+                name: "update",
+                description: "Update a Task by contactId and taskId",
+            },
+            action: {
+                method: "PUT",
+                url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+            },
+            output: {
+                name: "task",
+                extract: "task",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.contact.id,
+                field.task.id,
+                field.task.updateFields,
+            ],
+        },
+        {
+            option: {
+                name: "delete",
+                description: "Delete a Task by taskId",
+            },
+            action: {
+                method: "DELETE",
+                url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+            },
+            output: {
+                name: "success",
+                extract: "succeded",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.contact.id,
+                field.task.id,
+            ],
+        },
+    ]),
 };
 //# sourceMappingURL=objects.js.map

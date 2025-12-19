@@ -497,6 +497,66 @@ const field = {
       routing: { send: { type: "body", property: "body" } },
     } as INodeProperties,
   },
+  task: {
+    id: {
+      displayName: "Task ID",
+      name: "f_task_id",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The ID of the task",
+    } as INodeProperties,
+    updateFields: {
+      displayName: "Task Fields",
+      name: "f_task_updateFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      options: [
+        {
+          displayName: "Title",
+          name: "title",
+          type: "string",
+          default: "",
+          description: "The title of the task",
+          routing: { send: { type: "body", property: "title" } },
+        },
+        {
+          displayName: "Body",
+          name: "body",
+          type: "string",
+          default: "",
+          description: "The description/body of the task",
+          routing: { send: { type: "body", property: "body" } },
+        },
+        {
+          displayName: "Due Date",
+          name: "dueDate",
+          type: "dateTime",
+          default: "",
+          description: "The due date of the task. Format: ISO 8601",
+          routing: { send: { type: "body", property: "dueDate" } },
+        },
+        {
+          displayName: "Assigned To",
+          name: "assignedTo",
+          type: "string",
+          default: "",
+          description: "The ID of the user the task is assigned to",
+          routing: { send: { type: "body", property: "assignedTo" } },
+        },
+        {
+          displayName: "Completed",
+          name: "completed",
+          type: "boolean",
+          default: false,
+          description: "Whether the task is completed",
+          routing: { send: { type: "body", property: "completed" } },
+        },
+      ],
+      description: "Fields to update on the task",
+    } as INodeProperties,
+  },
 }
 
 export const data = {
@@ -939,217 +999,113 @@ export const data = {
         field.note.id,
       ],
     },
-  ])
+  ]),
+  task: createOperation("task", [
+    { // task.get
+      option: {
+        name: "get",
+        description: "Get a Task by taskId",
+      },
+      action: {
+        method: "GET",
+        url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+      },
+      output: {
+        name: "task",
+        extract: "task",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.task.id,
+      ],
+    },
+    { // task.getMany
+      option: {
+        name: "get many",
+        description: "Get many Tasks by contactId",
+      },
+      action: {
+        method: "GET",
+        url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
+      },
+      output: {
+        name: "task",
+        extract: "tasks",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+      ],
+    },
+    { // task.create
+      option: {
+        name: "create",
+        description: "Create a Task by contactId",
+      },
+      action: {
+        method: "POST",
+        url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
+      },
+      output: {
+        name: "task",
+        extract: "task",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.task.updateFields,
+      ],
+    },
+    { // task.update
+      option: {
+        name: "update",
+        description: "Update a Task by contactId and taskId",
+      },
+      action: {
+        method: "PUT",
+        url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+      },
+      output: {
+        name: "task",
+        extract: "task",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.task.id,
+        field.task.updateFields,
+      ],
+    },
+    { // task.delete
+      option: {
+        name: "delete",
+        description: "Delete a Task by taskId",
+      },
+      action: {
+        method: "DELETE",
+        url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
+      },
+      output: {
+        name: "success",
+        extract: "succeded",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.task.id,
+      ],
+    },
+  ]),
 }
 
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-export const task = createOperation("task", [
-  { // task.get
-    option: {
-      name: "get",
-      description: "Get a task by taskId",
-    },
-    action: {
-      method: "GET",
-      url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
-    },
-    output: {
-      name: "task",
-      extract: "task",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          title       : data.title ?? null,
-          body        : data.body ?? null,
-          assignedTo  : data.assignedTo ?? null,
-          dueDate     : data.dueDate ?? null,
-          completed   : data.completed ?? null,
-          contactId   : data.contactId ?? null,
-      })`,
-      simpleTemplate: `({
-          id    : data.id ?? null,
-          title : data.title ?? null,
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-      field.task.id,
-    ],
-  },
-  { // task.getMany
-    option: {
-      name: "get many",
-      description: "Get many tasks for a contact",
-    },
-    action: {
-      method: "GET",
-      url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
-    },
-    output: {
-      name: "task",
-      extract: "tasks",
-      sanitizedFull: `data.map((item) => ({
-          id          : item.id ?? null,
-          title       : item.title ?? null,
-          body        : item.body ?? null,
-          assignedTo  : item.assignedTo ?? null,
-          dueDate     : item.dueDate ?? null,
-          completed   : item.completed ?? null,
-          contactId   : item.contactId ?? null,
-      }))`,
-      simpleTemplate: `data.map((item) => ({
-          id          : item.id ?? null,
-          title       : item.title ?? null,
-          completed   : item.completed ?? null,
-      }))`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-    ],
-  },
-  { // task.create
-    option: {
-      name: "create",
-      description: "Create a new task for a contact",
-    },
-    action: {
-      method: "POST",
-      url: "=/contacts/{{$parameter.f_contact_id}}/tasks",
-      body: `={{ {
-        title: $parameter.f_task_title,
-        body: $parameter.f_task_body || undefined,
-        dueDate: $parameter.f_task_dueDate,
-        completed: $parameter.f_task_completed,
-        assignedTo: $parameter.f_task_assignedTo || undefined
-      } }}`,
-    },
-    output: {
-      name: "task",
-      extract: "task",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          title       : data.title ?? null,
-          body        : data.body ?? null,
-          assignedTo  : data.assignedTo ?? null,
-          dueDate     : data.dueDate ?? null,
-          completed   : data.completed ?? null,
-          contactId   : data.contactId ?? null,
-      })`,
-      simpleTemplate: `({
-          id    : data.id ?? null,
-          title : data.title ?? null,
-          completed : data.completed ?? null,
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-      field.task.title,
-      field.task.dueDate,
-      field.task.completed,
-      field.task.body,
-      field.task.assignedTo,
-    ],
-  },
-  { // task.update
-    option: {
-      name: "update",
-      description: "Update a task for a contact",
-    },
-    action: {
-      method: "PUT",
-      url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
-      body: `={{(() => {
-          const body = { ...$parameter.f_task_updateFields };
-          Object.keys(body).forEach((key) => {
-            if (body[key] === "") {
-              body[key] = null;
-            }
-          });
-          return body;
-      })()}}`,
-    },
-    output: {
-      name: "task",
-      extract: "task",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          title       : data.title ?? null,
-          body        : data.body ?? null,
-          assignedTo  : data.assignedTo ?? null,
-          dueDate     : data.dueDate ?? null,
-          completed   : data.completed ?? null,
-          contactId   : data.contactId ?? null,
-      })`,
-      simpleTemplate: `({
-          id    : data.id ?? null,
-          title : data.title ?? null,
-          completed : data.completed ?? null,
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-      field.task.id,
-      field.task.updateFields,
-    ],
-  },
-  { // task.delete
-    option: {
-      name: "delete",
-      description: "Delete a task by taskId",
-    },
-    action: {
-      method: "DELETE",
-      url: "=/contacts/{{$parameter.f_contact_id}}/tasks/{{$parameter.f_task_id}}",
-    },
-    output: {
-      name: "task",
-      extract: "",
-      sanitizedFull: `data`,
-      simpleTemplate: `data`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-      field.task.id,
-    ],
-  },
-])
-export const conversation = createOperation("conversation", [])
-
-
-*/
