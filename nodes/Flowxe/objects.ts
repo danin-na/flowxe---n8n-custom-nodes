@@ -1,218 +1,9 @@
 import type { INodeProperties } from "n8n-workflow"
+import type { IExecuteSingleFunctions, IHttpRequestOptions } from 'n8n-workflow'
 
-const field = {
-  common: {
-    apiKey: {
-      displayName: "API Keys",
-      name: "f_common_apiKey",
-      type: "string",
-      default: "",
-      required: true,
-      typeOptions: { password: true },
-      description: "Private Integration Token (Authorization: Bearer ...)",
-    } as INodeProperties,
-    responseFormat: {
-      displayName: "Response Format",
-      name: "f_common_responseFormat",
-      type: "options",
-      noDataExpression: true,
-      default: "sanitizedSimple",
-      description: "RAW returns the full API response. Sanitized returns a cleaned object output.",
-      options: [
-        { name: "Debug Mode (RAW)", value: "raw" },
-        { name: "Sanitized Full", value: "sanitizedFull" },
-        { name: "Sanitized Simple", value: "sanitizedSimple" },
-      ],
-    } as INodeProperties,
-  },
-  location: {
-    id: {
-      displayName: "Location ID",
-      name: "f_location_id",
-      type: "string",
-      default: "",
-      required: true,
-      description: "The ID of the location",
-    } as INodeProperties,
-  },
-  customField: {
-    mode: {
-      displayName: "Custom Field Type",
-      name: "f_customField_mode",
-      type: "options",
-      default: "all",
-      options: [
-        { name: "All", value: "all" },
-        { name: "Contact", value: "contact" },
-        { name: "Opportunity", value: "opportunity" },
-      ],
-      description: "Model of the custom field you want to retrieve",
-    } as INodeProperties,
-  },
-  contact: {
-    id: {
-      displayName: "Contact ID",
-      name: "f_contact_id",
-      type: "string",
-      default: "",
-      required: true,
-      description: "The ID of the contact",
-    } as INodeProperties,
-    updateFields: {
-      displayName: "Update Fields",
-      name: "f_contact_updateFields",
-      type: "collection",
-      placeholder: "Add Field",
-      default: {},
-      // eslint-disable-next-line n8n-nodes-base/node-param-collection-type-unsorted-items
-      options: [
-        {
-          displayName: "First Name",
-          name: "firstName",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Last Name",
-          name: "lastName",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Full Name",
-          name: "name",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Email",
-          name: "email",
-          type: "string",
-          placeholder: "name@email.com",
-          default: "",
-        },
-        {
-          displayName: "Phone",
-          name: "phone",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Company Name",
-          name: "companyName",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Address 1",
-          name: "address1",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "City",
-          name: "city",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "State",
-          name: "state",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Postal Code",
-          name: "postalCode",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Country",
-          name: "country",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Timezone",
-          name: "timezone",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Website",
-          name: "website",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Source",
-          name: "source",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Date of Birth",
-          name: "dateOfBirth",
-          type: "string",
-          default: "",
-          description: "Format: YYYY-MM-DD",
-        },
-        {
-          displayName: "Gender",
-          name: "gender",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "DND",
-          name: "dnd",
-          type: "boolean",
-          default: false,
-        },
-        {
-          displayName: "Assigned To",
-          name: "assignedTo",
-          type: "string",
-          default: "",
-          description: "The user ID to whom the contact is assigned",
-        },
-        {
-          displayName: "Custom Fields",
-          name: "customFields",
-          type: "fixedCollection",
-          placeholder: "Add Custom Field",
-          default: {},
-          typeOptions: {
-            multipleValues: true,
-          },
-          options: [
-            {
-              name: "customFieldValues",
-              displayName: "Custom Field",
-              values: [
-                {
-                  displayName: "Field ID",
-                  name: "id",
-                  type: "string",
-                  default: "",
-                  description: "The unique ID of the custom field",
-                },
-                {
-                  displayName: "Value",
-                  name: "value",
-                  type: "string",
-                  default: "",
-                  description: "The value to set for the custom field",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      description: "Fields to update on the contact",
-    } as INodeProperties,
-  },
+/*
+const f = {
+
   task: {
     id: {
       displayName: "Task ID",
@@ -300,34 +91,10 @@ const field = {
       ],
     } as INodeProperties,
   },
-  tag: {
-    id: {
-      displayName: "Tag ID",
-      name: "f_tag_id",
-      type: "string",
-      default: "",
-      required: true,
-      description: "The ID of the tag",
-    } as INodeProperties,
-    name: {
-      displayName: "Name",
-      name: "f_tag_name",
-      type: "string",
-      default: "",
-      required: true,
-      description: "The name of the tag",
-    } as INodeProperties,
-    tags: {
-      displayName: "Tags",
-      name: "f_tag_tags",
-      type: "string",
-      default: "",
-      placeholder: "new customer, ready to buy, vip-member",
-      required: true,
-      description: "Tags to add/remove, comma-separated",
-    } as INodeProperties,
-  },
+
+
 }
+*/
 
 // ----------------------------------------------------------------------
 // Hepers - Recourse and Operation + Type
@@ -335,7 +102,6 @@ const field = {
 
 type Option = {
   name: string
-  value: string
   description: string
 }
 type Action = {
@@ -347,8 +113,8 @@ type Action = {
 type Output = {
   name: string
   extract: string
-  sanitizedFull: string
-  sanitizedSimple: string
+  sanitizedFull?: string
+  simpleTemplate: string
 }
 type Operation = {
   option: Option
@@ -356,6 +122,31 @@ type Operation = {
   output: Output
   fields: INodeProperties[]
 }
+function toTitleCase(str: string)
+{
+  return str
+    .replace(/([A-Z])/g, " $1")
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+    .replace(/\s+/g, " ")
+    .trim()
+}
+function toCamelCase(str: string)
+{
+  return str
+    .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+    .replace(/^(.)/, (c) => c.toLowerCase())
+}
+function toSafeCamelCase(str: string)
+{
+  return str
+    .trim()
+    .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .replace(/^(.)/, (c) => c.toLowerCase())
+}
+
+const resourceOptions: Array<{ name: string; value: string }> = []
+
 function createResource(): INodeProperties
 {
   return {
@@ -363,23 +154,17 @@ function createResource(): INodeProperties
     name: "resource",
     type: "options",
     noDataExpression: true,
-    // eslint-disable-next-line n8n-nodes-base/node-param-options-type-unsorted-items
-    options: [
-      { name: "Contact", value: "contact" },
-      { name: "Location", value: "location" },
-      { name: "Phone Number", value: "phoneNumber" },
-      { name: "Custom Field", value: "customField" },
-      { name: "Pipeline", value: "pipeline" },
-      { name: "Tag", value: "tag" },
-      { name: "Note", value: "note" },
-      { name: "Task", value: "task" },
-      { name: "Conversation", value: "conversation" },
-    ],
+    options: resourceOptions,
     default: "contact",
   }
 }
 function createOperation(name: string, definitions: Operation[])
 {
+  resourceOptions.push({
+    name: toTitleCase(name),
+    value: name,
+  })
+
   // 01 - create operation
   const operation: INodeProperties = {
     displayName: "Operation",
@@ -392,9 +177,9 @@ function createOperation(name: string, definitions: Operation[])
     {
       // 02 - create option
       return {
-        name: opt.name,
-        value: opt.value,
-        action: opt.name,
+        name: toTitleCase(name + " . " + opt.name),
+        action: toTitleCase(name + " . " + opt.name),
+        value: toSafeCamelCase(name + " " + opt.name),
         description: opt.description,
         // 03 - create action
         routing: {
@@ -412,9 +197,9 @@ function createOperation(name: string, definitions: Operation[])
                             const mode = $parameter.f_common_responseFormat
                             const body = $response.body
                             const data = $response.body.${out.extract} ?? {}
-                            if(mode === 'raw') return { rawResponse:body };
-                            if(mode === 'sanitizedFull') return { ${out.name}: ${out.sanitizedFull} }
-                            if(mode === 'sanitizedSimple') return { ${out.name}: ${out.sanitizedSimple} }
+                            if(mode === 'raw') return { body };
+                            if(mode === 'full') return { ${out.name}: data }
+                            if(mode === 'simple') return { ${out.name}: ${out.simpleTemplate} }
                           })()}}` }
             }]
           }
@@ -430,7 +215,7 @@ function createOperation(name: string, definitions: Operation[])
       displayOptions: {
         show: {
           resource: [name],
-          operation: [def.option.value],
+          operation: [toSafeCamelCase(name + " " + def.option.name)],
         },
       },
     }))
@@ -438,78 +223,409 @@ function createOperation(name: string, definitions: Operation[])
 
   return { operation, fields }
 }
+async function preSendCustomField(
+  this: IExecuteSingleFunctions,
+  requestOptions: IHttpRequestOptions,
+): Promise<IHttpRequestOptions>
+{
+  const b: any = requestOptions.body ??= {}
+
+  const rows = b.__customFieldsUi?.customFieldValues
+  b.customFields = Array.isArray(rows)
+    ? rows.filter((r: any) => r?.id).map((r: any) => ({ id: r.id, field_value: r.field_value }))
+    : b.customFields
+
+  delete b.__customFieldsUi
+  return requestOptions
+}
 
 // ----------------------------------------------------------------------
 // 3. EXPORTS
 // ----------------------------------------------------------------------
 
-export const resource = createResource()
-export const location = createOperation("location", [
-  {// location.Get
-    option: {
-      name: "Get",
-      value: "get",
-      description: "Get a location by locationId",
-    },
-    action: {
-      method: "GET",
-      url: "=/locations/{{$parameter.f_location_id}}",
-    },
-    output: {
-      name: "location",
-      extract: "location",
-      sanitizedFull: `({
-          id        : data.id ?? null,
-          name      : data.name ?? null,
-          website   : data.website ?? null,
-          timezone  : data.timezone ?? null,
-          email     : data.email ?? null,
-          phone     : data.phone ?? null,
-          address: {
-            line1   : data.address ?? null,
-            city    : data.city ?? null,
-            state   : data.state ?? null,
-            zipCode : data.postalCode ?? null,
-            country : data.country ?? null,
-          },
-      })`,
-      sanitizedSimple: `({
-          id        : data.id ?? null,
-          name      : data.name ?? null,
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-    ],
+const field = {
+  common: {
+    apiKey: {
+      displayName: "API Keys",
+      name: "f_common_apiKey",
+      type: "string",
+      default: "",
+      required: true,
+      typeOptions: { password: true },
+      description: "Highlevel Private Integration Token",
+    } as INodeProperties,
+    responseFormat: {
+      displayName: "Response Format",
+      name: "f_common_responseFormat",
+      type: "options",
+      noDataExpression: true,
+      default: "simple",
+      description: "Format / Template of the response from this node",
+      options: [
+        { name: "Raw", value: "raw" },
+        { name: "Full", value: "full" },
+        { name: "Simple", value: "simple" },
+      ],
+    } as INodeProperties,
   },
-])
-export const pipeline = createOperation("pipeline", [
-  {// pipeline.GetMany
-    option: {
-      name: "Get Many",
-      value: "getMany",
-      description: "Get Many pipelines for a location",
-    },
-    action: {
-      method: "GET",
-      url: "/opportunities/pipelines",
-      qs: {
-        locationId: "={{$parameter.f_location_id}}",
+  contact: {
+    id: {
+      displayName: "Contact ID",
+      name: "f_contact_id",
+      type: "string",
+      default: "",
+      description: "Highlevel Contact ID",
+    } as INodeProperties,
+    updateFields: {
+      displayName: "Update Fields",
+      name: "f_contact_updateFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      options: [
+        {
+          displayName: "First Name",
+          name: "firstName",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "firstName" } },
+        },
+        {
+          displayName: "Last Name",
+          name: "lastName",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "lastName" } },
+        },
+        {
+          displayName: "Full Name",
+          name: "name",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "fullName" } },
+        },
+        {
+          displayName: "Email",
+          name: "email",
+          type: "string",
+          placeholder: "name@email.com",
+          default: "",
+          routing: { send: { type: "body", property: "email" } },
+        },
+        {
+          displayName: "Phone",
+          name: "phone",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "phone" } },
+        },
+        {
+          displayName: "Address 1",
+          name: "address1",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "address1" } },
+        },
+        {
+          displayName: "City",
+          name: "city",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "city" } },
+        },
+        {
+          displayName: "State",
+          name: "state",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "state" } },
+        },
+        {
+          displayName: "Postal Code",
+          name: "postalCode",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "postalCode" } },
+        },
+        {
+          displayName: "Country",
+          name: "country",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "country" } },
+        },
+        {
+          displayName: "Timezone",
+          name: "timezone",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "timezone" } },
+        },
+        {
+          displayName: "Website",
+          name: "website",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "website" } },
+        },
+        {
+          displayName: "Source",
+          name: "source",
+          type: "string",
+          default: "",
+          routing: { send: { type: "body", property: "source" } },
+        },
+        {
+          displayName: "Date of Birth",
+          name: "dateOfBirth",
+          type: "dateTime",
+          default: "",
+          description: "The birth date of the contact. Supported formats: YYYY/MM/DD, MM/DD/YYYY, YYYY-MM-DD, MM-DD-YYYY, YYYY.MM.DD, MM.DD.YYYY, YYYY_MM_DD, MM_DD_YYYY",
+          routing: { send: { type: "body", property: "dateOfBirth" } },
+        },
+        {
+          displayName: "Assigned To",
+          name: "assignedTo",
+          type: "string",
+          default: "",
+          description: "The user ID to whom the contact is assigned",
+          routing: { send: { type: "body", property: "assignedTo" } },
+        },
+        {
+          displayName: 'Custom Fields',
+          name: 'f_contact_customFieldsUi',
+          type: 'fixedCollection',
+          placeholder: 'Add Custom Field',
+          default: {},
+          typeOptions: { multipleValues: true }, // repeatable rows :contentReference[oaicite:2]{index=2}
+          options: [
+            {
+              name: 'customFieldValues',
+              displayName: 'Custom Field',
+              values: [
+                {
+                  displayName: 'ID',
+                  name: 'id',
+                  type: 'string',
+                  default: '',
+                  description: 'HighLevel custom field id',
+                },
+                {
+                  displayName: 'Field Value',
+                  name: 'field_value',
+                  type: 'json',
+                  default: '""',
+                  description: 'Value to set (string/number/array/object)',
+                },
+              ],
+            },
+          ],
+          routing: {
+            send: { type: 'body', property: '__customFieldsUi', preSend: [preSendCustomField], },
+          },
+        },
+      ],
+      description: "Fields to update on the contact",
+    } as INodeProperties,
+  },
+  location: {
+    id: {
+      displayName: "Location ID",
+      name: "f_location_id",
+      type: "string",
+      default: "",
+      description: "Highlevel Location / Sub-account ID",
+    } as INodeProperties,
+  },
+  customField: {
+    mode: {
+      displayName: "Custom Field Mode",
+      name: "f_customField_mode",
+      type: "options",
+      default: "all",
+      options: [
+        { name: "All", value: "all" },
+        { name: "Contact", value: "contact" },
+        { name: "Opportunity", value: "opportunity" },
+      ],
+      description: "Model of the custom field you want to retrieve",
+    } as INodeProperties,
+  },
+  tag: {
+    id: {
+      displayName: "Tag ID",
+      name: "f_tag_id",
+      type: "string",
+      default: "",
+      required: true,
+      description: "HighLevel Tag ID",
+    } as INodeProperties,
+    name: {
+      displayName: "Name",
+      name: "f_tag_name",
+      type: "string",
+      default: "",
+      required: true,
+      description: "HighLevel Tag Name",
+      routing: { send: { type: "body", property: "name" } },
+    } as INodeProperties,
+    tags: {
+      displayName: "Tags",
+      name: "f_tag_tags",
+      type: "json",
+      default: "={{ ['TagOne','TagTwo'] }}",
+      placeholder: "new customer, ready to buy, vip-member",
+      description: "Array of tags to add/remove, comma-separated",
+      routing: { send: { type: "body", property: "tags" } },
+    } as INodeProperties,
+  },
+  note: {
+    id: {
+      displayName: "Note ID",
+      name: "f_note_id",
+      type: "string",
+      default: "",
+      description: "HighLevel Note ID",
+    } as INodeProperties,
+    body: {
+      displayName: "Body",
+      name: "f_note_body",
+      type: "string",
+      default: "",
+      required: true,
+      description: "The content/body of the note",
+      routing: { send: { type: "body", property: "body" } },
+    } as INodeProperties,
+  },
+}
+
+export const data = {
+  resource: createResource(),
+  contact: createOperation("contact", [
+    { // contact.get
+      option: {
+        name: "get",
+        description: "Get a Contact by contactId",
       },
+      action: {
+        method: "GET",
+        url: "=/contacts/{{$parameter.f_contact_id}}",
+      },
+      output: {
+        name: "contact",
+        extract: "contact",
+        simpleTemplate: `({
+          id          : data.id ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          customFields: data.customFields ?? [],
+      })`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+      ],
     },
-    output: {
-      name: "pipeline",
-      extract: "pipelines",
-      sanitizedFull: `data.map((item) => ({
-          id: item.id ?? null,
-          name: item.name ?? null,
-          stages: item.stages ?? [],
-          showInFunnel: item.showInFunnel ?? null,
-          showInChart: item.showInChart ?? null,
+    { // contact.update
+      option: {
+        name: "update",
+        description: "Update a Contact by contactId",
+      },
+      action: {
+        method: "PUT",
+        url: "=/contacts/{{$parameter.f_contact_id}}",
+      },
+      output: {
+        name: "contact",
+        extract: "contact",
+        simpleTemplate: `({
+          id          : data.id ?? null,
+          firstName   : data.firstName ?? null,
+          lastName    : data.lastName ?? null,
+          email       : data.email ?? null,
+          phone       : data.phone ?? null,
+          customFields: data.customFields ?? [],
+      })`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.contact.updateFields,
+      ],
+    },
+  ]),
+  location: createOperation("location", [
+    {// location.get
+      option: {
+        name: "get",
+        description: "Get a Location by locationId",
+      },
+      action: {
+        method: "GET",
+        url: "=/locations/{{$parameter.f_location_id}}",
+      },
+      output: {
+        name: "location",
+        extract: "location",
+        simpleTemplate: `({
+          id        : data.id ?? null,
+          name      : data.name ?? null,
+      })`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+      ],
+    },
+  ]),
+  phone: createOperation("phone", [
+    {// phone.getMany
+      option: {
+        name: "get many",
+        description: "Get many Phone Numbers by locationId",
+      },
+      action: {
+        method: "GET",
+        url: "=/phone-system/numbers/location/{{$parameter.f_location_id}}",
+      },
+      output: {
+        name: "phone",
+        extract: "numbers",
+        simpleTemplate: `data.map((item) => ({
+          id          : item.sid ?? null,
+          phoneNumber : item.phoneNumber ?? null,
+          name        : item.friendlyName ?? null,
       }))`,
-      sanitizedSimple: `data.map((item) => ({
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+      ],
+    },
+  ]),
+  pipeline: createOperation("pipeline", [
+    {// pipeline.getMany
+      option: {
+        name: "get many",
+        description: "Get many Pipelines by locationId",
+      },
+      action: {
+        method: "GET",
+        url: "/opportunities/pipelines",
+        qs: {
+          locationId: "={{$parameter.f_location_id}}",
+        },
+      },
+      output: {
+        name: "pipeline",
+        extract: "pipelines",
+        simpleTemplate: `data.map((item) => ({
           id: item.id ?? null,
           name: item.name ?? null,
           stages: (item.stages ?? []).map((s) => ({
@@ -517,414 +633,347 @@ export const pipeline = createOperation("pipeline", [
             name: s.name ?? null,
           })),
       }))`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-    ],
-  },
-])
-export const phoneNumber = createOperation("phoneNumber", [
-  { // phoneNumber.GetMany
-    option: {
-      name: "Get Many",
-      value: "getMany",
-      description: "Get Many phone numbers for a location",
-    },
-    action: {
-      method: "GET",
-      url: "=/phone-system/numbers/location/{{$parameter.f_location_id}}",
-    },
-    output: {
-      name: "phoneNumber",
-      extract: "numbers",
-      sanitizedFull: `data.map((item) => ({
-          id          : item.sid ?? null,
-          phoneNumber : item.phoneNumber ?? null,
-          name        : item.friendlyName ?? null,
-          type        : item.type ?? null,
-          country : item.countryCode ?? null,
-          isDefault   : item.isDefaultNumber ?? null,
-          capabilities : item.capabilities ?? [],
-      }))`,
-      sanitizedSimple: `data.map((item) => ({
-          id          : item.sid ?? null,
-          phoneNumber : item.phoneNumber ?? null,
-          name        : item.friendlyName ?? null,
-      }))`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-    ],
-  },
-])
-export const customField = createOperation("customField", [
-  { // customField.GetMany
-    option: {
-      name: "Get Many",
-      value: "getMany",
-      description: "Get Many custom fields for a location",
-    },
-    action: {
-      method: "GET",
-      url: "=/locations/{{$parameter.f_location_id}}/customFields",
-      qs: {
-        model: "={{$parameter.f_customField_mode}}",
       },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+      ],
     },
-    output: {
-      name: "customField",
-      extract: "customFields",
-      sanitizedFull: `data.map((item) => ({
+  ]),
+  customField: createOperation("customField", [
+    { // customField.getMany
+      option: {
+        name: "get many",
+        description: "Get many Custom Fields by locationId",
+      },
+      action: {
+        method: "GET",
+        url: "=/locations/{{$parameter.f_location_id}}/customFields",
+        qs: {
+          model: "={{$parameter.f_customField_mode}}",
+        },
+      },
+      output: {
+        name: "customField",
+        extract: "customFields",
+        simpleTemplate: `data.map((item) => ({
           id          : item.id ?? null,
           name        : item.name ?? null,
           fieldKey    : item.fieldKey ?? null,
-          dataType    : item.dataType ?? null,
-          placeholder : item.placeholder ?? null,
-          locationId  : item.locationId ?? null,
           model       : item.model ?? null,
-          position    : item.position ?? null,
-          documentType: item.documentType ?? null,
-          parentId    : item.parentId ?? null,
-          dateAdded   : item.dateAdded   ?? null,
-          standard    : item.standard    ?? null,
       }))`,
-      sanitizedSimple: `data.map((item) => ({
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+        field.customField.mode,
+      ],
+    },
+  ]),
+  tag: createOperation("tag", [
+    { // tag.add
+      option: {
+        name: "add",
+        description: "Add Tag(s) by contactId",
+      },
+      action: {
+        method: "POST",
+        url: "=/contacts/{{$parameter.f_contact_id}}/tags",
+      },
+      output: {
+        name: "tag",
+        extract: "tags",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.tag.tags,
+      ],
+    },
+    { // tag.remove
+      option: {
+        name: "remove",
+        description: "Remove Tag(s) by contactId",
+      },
+      action: {
+        method: "DELETE",
+        url: "=/contacts/{{$parameter.f_contact_id}}/tags",
+      },
+      output: {
+        name: "tag",
+        extract: "tags",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.tag.tags,
+      ],
+    },
+    { // tag.get
+      option: {
+        name: "get",
+        description: "Get a Tag by locationId and tagId",
+      },
+      action: {
+        method: "GET",
+        url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
+      },
+      output: {
+        name: "tag",
+        extract: "tag",
+        simpleTemplate: `data`
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+        field.tag.id,
+      ],
+    },
+    { // tag.getMany
+      option: {
+        name: "get many",
+        description: "Get many Tags by locationId",
+      },
+      action: {
+        method: "GET",
+        url: "=/locations/{{$parameter.f_location_id}}/tags",
+      },
+      output: {
+        name: "tag",
+        extract: "tags",
+        simpleTemplate: `data`
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+      ],
+    },
+    { // tag.create
+      option: {
+        name: "create",
+        description: "Create a Tag by locationId",
+      },
+      action: {
+        method: "POST",
+        url: "=/locations/{{$parameter.f_location_id}}/tags",
+      },
+      output: {
+        name: "tag",
+        extract: "tag",
+        simpleTemplate: `data`
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+        field.tag.name,
+      ],
+    },
+    { // tag.update
+      option: {
+        name: "update",
+        description: "Update a Tag by locationId and tagId",
+      },
+      action: {
+        method: "PUT",
+        url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
+      },
+      output: {
+        name: "tag",
+        extract: "tag",
+        simpleTemplate: `data`
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+        field.tag.id,
+        field.tag.name,
+      ],
+    },
+    { // tag.delete
+      option: {
+        name: "delete",
+        description: "Delete a Tag by locationId and tagId",
+      },
+      action: {
+        method: "DELETE",
+        url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
+      },
+      output: {
+        name: "success",
+        extract: "succeded",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.location.id,
+        field.tag.id,
+      ],
+    },
+  ]),
+  note: createOperation("note", [
+    { // note.get
+      option: {
+        name: "get",
+        description: "Get a Note by noteId",
+      },
+      action: {
+        method: "GET",
+        url: "=/contacts/{{$parameter.f_contact_id}}/notes/{{$parameter.f_note_id}}",
+      },
+      output: {
+        name: "note",
+        extract: "note",
+        simpleTemplate: `({
+          id    : data.id ?? null,
+          body  : data.bodyText ?? null,
+      })`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.note.id,
+      ],
+    },
+    { // note.getMany
+      option: {
+        name: "get many",
+        description: "Get many Notes by contactId",
+      },
+      action: {
+        method: "GET",
+        url: "=/contacts/{{$parameter.f_contact_id}}/notes",
+      },
+      output: {
+        name: "note",
+        extract: "notes",
+        simpleTemplate: `data.map((item) => ({
           id          : item.id ?? null,
-          name        : item.name ?? null,
-          fieldKey    : item.fieldKey ?? null,
-          model       : item.model ?? null,
+          body        : item.bodyText ?? null,
       }))`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+      ],
     },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-      field.customField.mode,
-    ],
-  },
-])
-export const contact = createOperation("contact", [
-  { // contact.Get
-    option: {
-      name: "Get",
-      value: "get",
-      description: "Get a contact by contactId",
-    },
-    action: {
-      method: "GET",
-      url: "=/contacts/{{$parameter.f_contact_id}}",
-    },
-    output: {
-      name: "contact",
-      extract: "contact",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          locationId  : data.locationId ?? null,
-          firstName   : data.firstName ?? null,
-          lastName    : data.lastName ?? null,
-          email       : data.email ?? null,
-          phone       : data.phone ?? null,
-          type        : data.type ?? null,
-          source      : data.source ?? null,
-          dateAdded   : data.dateAdded ?? null,
-          dateUpdated : data.dateUpdated ?? null,
-          tags        : data.tags ?? [],
-          customFields: data.customFields ?? [],
-          address1    : data.address1 ?? null,
-          city        : data.city ?? null,
-          state       : data.state ?? null,
-          country     : data.country ?? null,
-          postalCode  : data.postalCode ?? null,
-          timezone    : data.timezone ?? null,
-          companyName : data.companyName ?? null,
+    { // note.create
+      option: {
+        name: "create",
+        description: "Create a Note by contactId",
+      },
+      action: {
+        method: "POST",
+        url: "=/contacts/{{$parameter.f_contact_id}}/notes",
+      },
+      output: {
+        name: "note",
+        extract: "note",
+        simpleTemplate: `({
+          id    : data.id ?? null,
+          body  : data.bodyText ?? null,
       })`,
-      sanitizedSimple: `({
-          id          : data.id ?? null,
-          firstName   : data.firstName ?? null,
-          lastName    : data.lastName ?? null,
-          email       : data.email ?? null,
-          phone       : data.phone ?? null,
-          customFields: data.customFields ?? [],
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.note.body,
+      ],
+    },
+    { // note.update
+      option: {
+        name: "update",
+        description: "Update a Note by contactId and noteId",
+      },
+      action: {
+        method: "PUT",
+        url: "=/contacts/{{$parameter.f_contact_id}}/notes/{{$parameter.f_note_id}}",
+      },
+      output: {
+        name: "note",
+        extract: "note",
+        simpleTemplate: `({
+          id    : data.id ?? null,
+          body  : data.bodyText ?? null,
       })`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.note.id,
+        field.note.body,
+      ],
     },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-    ],
-  },
-  { // contact.Update
-    option: {
-      name: "Update",
-      value: "update",
-      description: "Update a contact by contactId",
+    { // note.delete
+      option: {
+        name: "delete",
+        description: "Delete a Note by contactId and noteId",
+      },
+      action: {
+        method: "DELETE",
+        url: "=/contacts/{{$parameter.f_contact_id}}/notes/{{$parameter.f_note_id}}",
+      },
+      output: {
+        name: "success",
+        extract: "succeded",
+        simpleTemplate: `data`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.contact.id,
+        field.note.id,
+      ],
     },
-    action: {
-      method: "PUT",
-      url: "=/contacts/{{$parameter.f_contact_id}}",
-      body: `={{(() => {
-          const body = { ...$parameter.f_contact_updateFields };
-          if (body.customFields && body.customFields.customFieldValues) {
-            body.customFields = body.customFields.customFieldValues.map((cf) => ({
-              ...cf,
-              value: cf.value === "" ? null : cf.value,
-            }));
-          }
-          Object.keys(body).forEach((key) => {
-            if (key !== "customFields" && body[key] === "") {
-              body[key] = null;
-            }
-          });
-          return body;
-      })()}}`,
-    },
-    output: {
-      name: "contact",
-      extract: "contact",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          locationId  : data.locationId ?? null,
-          firstName   : data.firstName ?? null,
-          lastName    : data.lastName ?? null,
-          email       : data.email ?? null,
-          phone       : data.phone ?? null,
-          type        : data.type ?? null,
-          source      : data.source ?? null,
-          dateAdded   : data.dateAdded ?? null,
-          dateUpdated : data.dateUpdated ?? null,
-          tags        : data.tags ?? [],
-          customFields: data.customFields ?? [],
-          address1    : data.address1 ?? null,
-          city        : data.city ?? null,
-          state       : data.state ?? null,
-          country     : data.country ?? null,
-          postalCode  : data.postalCode ?? null,
-          timezone    : data.timezone ?? null,
-          companyName : data.companyName ?? null,
-      })`,
-      sanitizedSimple: `({
-          id          : data.id ?? null,
-          firstName   : data.firstName ?? null,
-          lastName    : data.lastName ?? null,
-          email       : data.email ?? null,
-          phone       : data.phone ?? null,
-          customFields: data.customFields ?? [],
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-      field.contact.updateFields,
-    ],
-  },
-])
+  ])
+}
 
-export const tag = createOperation("tag", [
-  { // tag.Add
-    option: {
-      name: "Add",
-      value: "add",
-      description: "Add tags to a contact",
-    },
-    action: {
-      method: "POST",
-      url: "=/contacts/{{$parameter.f_contact_id}}/tags",
-      body: `={{ { tags: ($parameter.f_tag_tags || '').split(',').map(t => t.trim()).filter(t => !!t) } }}`,
-    },
-    output: {
-      name: "tag",
-      extract: "tags",
-      sanitizedFull: `data`,
-      sanitizedSimple: `data`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-      field.tag.tags,
-    ],
-  },
-  { // tag.Remove
-    option: {
-      name: "Remove",
-      value: "remove",
-      description: "Remove tags from a contact",
-    },
-    action: {
-      method: "DELETE",
-      url: "=/contacts/{{$parameter.f_contact_id}}/tags",
-      body: `={{ { tags: ($parameter.f_tag_tags || '').split(',').map(t => t.trim()).filter(t => !!t) } }}`,
-    },
-    output: {
-      name: "tag",
-      extract: "tags",
-      sanitizedFull: `data`,
-      sanitizedSimple: `data`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.contact.id,
-      field.tag.tags,
-    ],
-  },
-  { // tag.Get
-    option: {
-      name: "Get",
-      value: "get",
-      description: "Get a tag by tagId",
-    },
-    action: {
-      method: "GET",
-      url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
-    },
-    output: {
-      name: "tag",
-      extract: "tag",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          name        : data.name ?? null,
-          locationId  : data.locationId ?? null,
-      })`,
-      sanitizedSimple: `({
-          id    : data.id ?? null,
-          name  : data.name ?? null,
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-      field.tag.id,
-    ],
-  },
-  { // tag.GetMany
-    option: {
-      name: "Get Many",
-      value: "getMany",
-      description: "Get many tags for a location",
-    },
-    action: {
-      method: "GET",
-      url: "=/locations/{{$parameter.f_location_id}}/tags",
-    },
-    output: {
-      name: "tag",
-      extract: "tags",
-      sanitizedFull: `data.map((item) => ({
-          id          : item.id ?? null,
-          name        : item.name ?? null,
-          locationId  : item.locationId ?? null,
-      }))`,
-      sanitizedSimple: `data.map((item) => ({
-          id          : item.id ?? null,
-          name        : item.name ?? null,
-      }))`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-    ],
-  },
-  { // tag.Create
-    option: {
-      name: "Create",
-      value: "create",
-      description: "Create a new tag for a location",
-    },
-    action: {
-      method: "POST",
-      url: "=/locations/{{$parameter.f_location_id}}/tags",
-      body: `={{ { name: $parameter.f_tag_name } }}`,
-    },
-    output: {
-      name: "tag",
-      extract: "tag",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          name        : data.name ?? null,
-          locationId  : data.locationId ?? null,
-      })`,
-      sanitizedSimple: `({
-          id    : data.id ?? null,
-          name  : data.name ?? null,
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-      field.tag.name,
-    ],
-  },
-  { // tag.Update
-    option: {
-      name: "Update",
-      value: "update",
-      description: "Update a tag for a location",
-    },
-    action: {
-      method: "PUT",
-      url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
-      body: `={{ { name: $parameter.f_tag_name } }}`,
-    },
-    output: {
-      name: "tag",
-      extract: "tag",
-      sanitizedFull: `({
-          id          : data.id ?? null,
-          name        : data.name ?? null,
-          locationId  : data.locationId ?? null,
-      })`,
-      sanitizedSimple: `({
-          id    : data.id ?? null,
-          name  : data.name ?? null,
-      })`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-      field.tag.id,
-      field.tag.name,
-    ],
-  },
-  { // tag.Delete
-    option: {
-      name: "Delete",
-      value: "delete",
-      description: "Delete a tag for a location",
-    },
-    action: {
-      method: "DELETE",
-      url: "=/locations/{{$parameter.f_location_id}}/tags/{{$parameter.f_tag_id}}",
-    },
-    output: {
-      name: "tag",
-      extract: "",
-      sanitizedFull: `data`,
-      sanitizedSimple: `data`,
-    },
-    fields: [
-      field.common.responseFormat,
-      field.common.apiKey,
-      field.location.id,
-      field.tag.id,
-    ],
-  },
-])
+
+
+
+
+
+
+
+
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export const task = createOperation("task", [
-  { // task.Get
+  { // task.get
     option: {
-      name: "Get",
-      value: "get",
+      name: "get",
       description: "Get a task by taskId",
     },
     action: {
@@ -943,7 +992,7 @@ export const task = createOperation("task", [
           completed   : data.completed ?? null,
           contactId   : data.contactId ?? null,
       })`,
-      sanitizedSimple: `({
+      simpleTemplate: `({
           id    : data.id ?? null,
           title : data.title ?? null,
       })`,
@@ -955,10 +1004,9 @@ export const task = createOperation("task", [
       field.task.id,
     ],
   },
-  { // task.GetMany
+  { // task.getMany
     option: {
-      name: "Get Many",
-      value: "getMany",
+      name: "get many",
       description: "Get many tasks for a contact",
     },
     action: {
@@ -977,7 +1025,7 @@ export const task = createOperation("task", [
           completed   : item.completed ?? null,
           contactId   : item.contactId ?? null,
       }))`,
-      sanitizedSimple: `data.map((item) => ({
+      simpleTemplate: `data.map((item) => ({
           id          : item.id ?? null,
           title       : item.title ?? null,
           completed   : item.completed ?? null,
@@ -989,10 +1037,9 @@ export const task = createOperation("task", [
       field.contact.id,
     ],
   },
-  { // task.Create
+  { // task.create
     option: {
-      name: "Create",
-      value: "create",
+      name: "create",
       description: "Create a new task for a contact",
     },
     action: {
@@ -1018,7 +1065,7 @@ export const task = createOperation("task", [
           completed   : data.completed ?? null,
           contactId   : data.contactId ?? null,
       })`,
-      sanitizedSimple: `({
+      simpleTemplate: `({
           id    : data.id ?? null,
           title : data.title ?? null,
           completed : data.completed ?? null,
@@ -1035,10 +1082,9 @@ export const task = createOperation("task", [
       field.task.assignedTo,
     ],
   },
-  { // task.Update
+  { // task.update
     option: {
-      name: "Update",
-      value: "update",
+      name: "update",
       description: "Update a task for a contact",
     },
     action: {
@@ -1066,7 +1112,7 @@ export const task = createOperation("task", [
           completed   : data.completed ?? null,
           contactId   : data.contactId ?? null,
       })`,
-      sanitizedSimple: `({
+      simpleTemplate: `({
           id    : data.id ?? null,
           title : data.title ?? null,
           completed : data.completed ?? null,
@@ -1080,10 +1126,9 @@ export const task = createOperation("task", [
       field.task.updateFields,
     ],
   },
-  { // task.Delete
+  { // task.delete
     option: {
-      name: "Delete",
-      value: "delete",
+      name: "delete",
       description: "Delete a task by taskId",
     },
     action: {
@@ -1094,7 +1139,7 @@ export const task = createOperation("task", [
       name: "task",
       extract: "",
       sanitizedFull: `data`,
-      sanitizedSimple: `data`,
+      simpleTemplate: `data`,
     },
     fields: [
       field.common.responseFormat,
@@ -1104,3 +1149,7 @@ export const task = createOperation("task", [
     ],
   },
 ])
+export const conversation = createOperation("conversation", [])
+
+
+*/

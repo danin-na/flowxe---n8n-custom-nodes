@@ -1,16 +1,17 @@
 import { INodeType, INodeTypeDescription } from 'n8n-workflow'
-import * as obj from './objects'
+import { data } from './objects'
 
 export class Flowxe implements INodeType
 {
 	description: INodeTypeDescription = {
+
 		displayName: 'Flowxe',
 		name: 'flowxe',
 		icon: 'file:flowxe.svg',
 		group: ['transform'],
 		version: 1,
 		usableAsTool: true,
-		subtitle: '={{$parameter.resource + " " + $parameter.operation}}',
+		subtitle: '={{$parameter.operation}}',
 		description: 'GoHighLevel Declarative',
 		defaults: { name: 'HighLevel' },
 		inputs: ['main'],
@@ -26,21 +27,28 @@ export class Flowxe implements INodeType
 		},
 
 		properties: [
-			obj.resource,
-			obj.contact.operation,
-			...obj.contact.fields,
-			obj.location.operation,
-			...obj.location.fields,
-			obj.pipeline.operation,
-			...obj.pipeline.fields,
-			obj.phoneNumber.operation,
-			...obj.phoneNumber.fields,
-			obj.customField.operation,
-			...obj.customField.fields,
-			obj.task.operation,
-			...obj.task.fields,
-			obj.tag.operation,
-			...obj.tag.fields,
+			data.resource,
+			// contact
+			data.contact.operation,
+			...data.contact.fields,
+			// location
+			data.location.operation,
+			...data.location.fields,
+			// phone
+			data.phone.operation,
+			...data.phone.fields,
+			// pipeline
+			data.pipeline.operation,
+			...data.pipeline.fields,
+			// customField
+			data.customField.operation,
+			...data.customField.fields,
+			// tag
+			data.tag.operation,
+			...data.tag.fields,
+			// note
+			data.note.operation,
+			...data.note.fields,
 		],
 	};
 }
