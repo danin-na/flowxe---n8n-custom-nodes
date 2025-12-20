@@ -494,14 +494,6 @@ const field = {
       description: "The body text of the message to send",
       routing: { send: { type: "body", property: "message" } },
     } as INodeProperties,
-    attachments: {
-      displayName: "Attachments",
-      name: "f_message_attachments",
-      type: "json",
-      default: "={{ ['URL_TO_FILE1', 'URL_TO_FILE2'] }}",
-      description: "The attachments to send with the message",
-      routing: { send: { type: "body", property: "attachments" } },
-    } as INodeProperties,
     fromNumber: {
       displayName: "From Number",
       name: "f_message_fromNumber",
@@ -517,6 +509,24 @@ const field = {
       default: "",
       description: "The number to send the message to",
       routing: { send: { type: "body", property: "toNumber" } },
+    } as INodeProperties,
+    extraFields: {
+      displayName: "DM Extra Fields",
+      name: "f_message_dm_extraFields",
+      type: "collection",
+      placeholder: "Add Field",
+      default: {},
+      options: [
+        {
+          displayName: "Attachments",
+          name: "f_message_attachments",
+          type: "json",
+          default: "={{ ['URL_TO_FILE1', 'URL_TO_FILE2'] }}",
+          description: "The attachments to send with the message",
+          routing: { send: { type: "body", property: "attachments" } },
+        },
+      ],
+      description: "Fields to update on the conversation",
     } as INodeProperties,
   },
 }
@@ -1213,7 +1223,7 @@ export const data = {
         { ...field.message.message, required: true },
         { ...field.message.fromNumber, required: true },
         { ...field.message.toNumber, required: true },
-        //field.message.attachments,
+        field.message.extraFields
       ],
     },
     { // message.sendDM
@@ -1236,7 +1246,7 @@ export const data = {
         { ...field.contact.id, routing: { send: { type: "body", property: "contactId" } }, required: true },
         { ...field.message.type, required: true },
         { ...field.message.message, required: true },
-        //field.message.attachments,
+        field.message.extraFields
       ],
     },
   ]),
