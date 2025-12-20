@@ -371,6 +371,42 @@ const field = {
             description: "Fields to update on the task",
         },
     },
+    conversation: {
+        id: {
+            displayName: "Conversation ID",
+            name: "f_conversation_id",
+            type: "string",
+            default: "",
+            required: true,
+            description: "The ID of the conversation",
+        },
+        updateFields: {
+            displayName: "Conversation Fields",
+            name: "f_conversation_updateFields",
+            type: "collection",
+            placeholder: "Add Field",
+            default: {},
+            options: [
+                {
+                    displayName: "Starred",
+                    name: "starred",
+                    type: "boolean",
+                    default: false,
+                    description: "Whether the conversation is starred",
+                    routing: { send: { type: "body", property: "starred" } },
+                },
+                {
+                    displayName: "Unread Count",
+                    name: "unreadCount",
+                    type: "number",
+                    default: 0,
+                    description: "The number of unread messages in the conversation",
+                    routing: { send: { type: "body", property: "unreadCount" } },
+                },
+            ],
+            description: "Fields to update on the conversation",
+        },
+    },
 };
 exports.data = {
     resource: createResource(),
@@ -917,6 +953,123 @@ exports.data = {
                 field.common.apiKey,
                 field.contact.id,
                 field.task.id,
+            ],
+        },
+    ]),
+    conversation: createOperation("conversation", [
+        {
+            option: {
+                name: "search",
+                description: "Search Conversations by contactId and locationId",
+            },
+            action: {
+                method: "GET",
+                url: "=/conversations/search",
+                qs: {
+                    locationId: "={{$parameter.f_location_id}}",
+                    contactId: "={{$parameter.f_contact_id}}",
+                },
+            },
+            output: {
+                name: "conversation",
+                extract: "conversations",
+                simpleTemplate: `data.map((item) => ({
+          id: item.id ?? null,
+          contactId: item.contactId ?? null,
+          locationId: item.locationId ?? null,
+          lastMessageBody: item.lastMessageBody ?? null,
+          lastMessageType: item.lastMessageType ?? null,
+          fullName: item.fullName ?? null,
+      }))`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.location.id,
+                field.contact.id,
+            ],
+        },
+        {
+            option: {
+                name: "get",
+                description: "Get a Conversation by conversationId",
+            },
+            action: {
+                method: "GET",
+                url: "=/conversations/{{$parameter.f_conversation_id}}",
+            },
+            output: {
+                name: "conversation",
+                extract: "conversation",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.conversation.id,
+            ],
+        },
+        {
+            option: {
+                name: "create",
+                description: "Create a Conversation by contactId and locationId",
+            },
+            action: {
+                method: "POST",
+                url: "=/conversations/",
+            },
+            output: {
+                name: "conversation",
+                extract: "conversation",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                { ...field.location.id, routing: { send: { type: "body", property: "locationId" } }, },
+                { ...field.contact.id, routing: { send: { type: "body", property: "contactId" } }, },
+            ],
+        },
+        {
+            option: {
+                name: "update",
+                description: "Update a Conversation by conversationId",
+            },
+            action: {
+                method: "PUT",
+                url: "=/conversations/{{$parameter.f_conversation_id}}",
+            },
+            output: {
+                name: "conversation",
+                extract: "conversation",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.conversation.id,
+                { ...field.location.id, routing: { send: { type: "body", property: "locationId" } }, },
+                field.conversation.updateFields,
+            ],
+        },
+        {
+            option: {
+                name: "delete",
+                description: "Delete a Conversation by conversationId",
+            },
+            action: {
+                method: "DELETE",
+                url: "=/conversations/{{$parameter.f_conversation_id}}",
+            },
+            output: {
+                name: "success",
+                extract: "success",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.conversation.id,
             ],
         },
     ]),

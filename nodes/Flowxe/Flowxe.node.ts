@@ -52,6 +52,9 @@ export class Flowxe implements INodeType
 			// task
 			data.task.operation,
 			...data.task.fields,
+			// conversation
+			data.conversation.operation,
+			...data.conversation.fields,
 		],
 	};
 }
