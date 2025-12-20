@@ -44,6 +44,8 @@ class Flowxe {
                 ...objects_1.data.task.fields,
                 objects_1.data.conversation.operation,
                 ...objects_1.data.conversation.fields,
+                objects_1.data.message.operation,
+                ...objects_1.data.message.fields,
             ],
         };
     }

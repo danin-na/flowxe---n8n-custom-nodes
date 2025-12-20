@@ -4,7 +4,6 @@ import { data } from './objects'
 export class Flowxe implements INodeType
 {
 	description: INodeTypeDescription = {
-
 		displayName: 'Flowxe',
 		name: 'flowxe',
 		icon: 'file:flowxe.svg',
@@ -55,6 +54,9 @@ export class Flowxe implements INodeType
 			// conversation
 			data.conversation.operation,
 			...data.conversation.fields,
+			// message
+			data.message.operation,
+			...data.message.fields,
 		],
 	};
 }

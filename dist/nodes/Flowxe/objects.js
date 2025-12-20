@@ -407,6 +407,75 @@ const field = {
             description: "Fields to update on the conversation",
         },
     },
+    message: {
+        type: {
+            displayName: "DM Type",
+            name: "f_message_type",
+            type: "options",
+            options: [
+                {
+                    name: "WhatsApp",
+                    value: "WhatsApp",
+                },
+                {
+                    name: "Instagram",
+                    value: "IG",
+                },
+                {
+                    name: "Facebook",
+                    value: "FB",
+                },
+                {
+                    name: "Custom",
+                    value: "Custom",
+                },
+                {
+                    name: "Live Chat",
+                    value: "Live_Chat",
+                },
+                {
+                    name: "Internal Comment",
+                    value: "Internal_Comment",
+                },
+            ],
+            default: "Live_Chat",
+            description: "The type of the message",
+            routing: { send: { type: "body", property: "type" } },
+        },
+        message: {
+            displayName: "Message",
+            name: "f_message_message",
+            type: "string",
+            default: "",
+            required: true,
+            description: "The body text of the message to send",
+            routing: { send: { type: "body", property: "message" } },
+        },
+        attachments: {
+            displayName: "Attachments",
+            name: "f_message_attachments",
+            type: "json",
+            default: "={{ ['URL_TO_FILE1', 'URL_TO_FILE2'] }}",
+            description: "The attachments to send with the message",
+            routing: { send: { type: "body", property: "attachments" } },
+        },
+        fromNumber: {
+            displayName: "From Number",
+            name: "f_message_fromNumber",
+            type: "string",
+            default: "",
+            description: "The number/ID to send the message from",
+            routing: { send: { type: "body", property: "fromNumber" } },
+        },
+        toNumber: {
+            displayName: "To Number",
+            name: "f_message_toNumber",
+            type: "string",
+            default: "",
+            description: "The number to send the message to",
+            routing: { send: { type: "body", property: "toNumber" } },
+        },
+    },
 };
 exports.data = {
     resource: createResource(),
@@ -1070,6 +1139,54 @@ exports.data = {
                 field.common.responseFormat,
                 field.common.apiKey,
                 field.conversation.id,
+            ],
+        },
+    ]),
+    message: createOperation("message", [
+        {
+            option: {
+                name: "send sms",
+                description: "Send an SMS Message by contactId",
+            },
+            action: {
+                method: "POST",
+                url: "=/conversations/messages",
+                body: { type: "SMS", },
+            },
+            output: {
+                name: "message",
+                extract: "messageId",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                { ...field.common.responseFormat, required: true },
+                { ...field.common.apiKey, required: true },
+                { ...field.contact.id, routing: { send: { type: "body", property: "contactId" } }, required: true },
+                { ...field.message.message, required: true },
+                { ...field.message.fromNumber, required: true },
+                { ...field.message.toNumber, required: true },
+            ],
+        },
+        {
+            option: {
+                name: "send dm",
+                description: "Send a Direct Message by contactId",
+            },
+            action: {
+                method: "POST",
+                url: "=/conversations/messages",
+            },
+            output: {
+                name: "message",
+                extract: "messageId",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                { ...field.common.responseFormat, required: true },
+                { ...field.common.apiKey, required: true },
+                { ...field.contact.id, routing: { send: { type: "body", property: "contactId" } }, required: true },
+                { ...field.message.type, required: true },
+                { ...field.message.message, required: true },
             ],
         },
     ]),
