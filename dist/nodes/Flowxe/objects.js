@@ -1,17 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.data = void 0;
+const resourceOptions = [];
 function toTitleCase(str) {
     return str
         .replace(/([A-Z])/g, " $1")
         .replace(/\b\w/g, (char) => char.toUpperCase())
         .replace(/\s+/g, " ")
         .trim();
-}
-function toCamelCase(str) {
-    return str
-        .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
-        .replace(/^(.)/, (c) => c.toLowerCase());
 }
 function toSafeCamelCase(str) {
     return str
@@ -20,7 +16,6 @@ function toSafeCamelCase(str) {
         .replace(/[^a-zA-Z0-9]/g, "")
         .replace(/^(.)/, (c) => c.toLowerCase());
 }
-const resourceOptions = [];
 function createResource() {
     return {
         displayName: "Resource",
@@ -84,16 +79,6 @@ function createOperation(name, definitions) {
         },
     })));
     return { operation, fields };
-}
-async function preSendCustomField(requestOptions) {
-    var _a, _b;
-    const b = (_a = requestOptions.body) !== null && _a !== void 0 ? _a : (requestOptions.body = {});
-    const rows = (_b = b.__customFieldsUi) === null || _b === void 0 ? void 0 : _b.customFieldValues;
-    b.customFields = Array.isArray(rows)
-        ? rows.filter((r) => r === null || r === void 0 ? void 0 : r.id).map((r) => ({ id: r.id, field_value: r.field_value }))
-        : b.customFields;
-    delete b.__customFieldsUi;
-    return requestOptions;
 }
 const field = {
     common: {
@@ -244,36 +229,13 @@ const field = {
                     routing: { send: { type: "body", property: "assignedTo" } },
                 },
                 {
-                    displayName: 'Custom Fields',
-                    name: 'f_contact_customFieldsUi',
-                    type: 'fixedCollection',
-                    placeholder: 'Add Custom Field',
-                    default: {},
-                    typeOptions: { multipleValues: true },
-                    options: [
-                        {
-                            name: 'customFieldValues',
-                            displayName: 'Custom Field',
-                            values: [
-                                {
-                                    displayName: 'ID',
-                                    name: 'id',
-                                    type: 'string',
-                                    default: '',
-                                    description: 'HighLevel custom field id',
-                                },
-                                {
-                                    displayName: 'Field Value',
-                                    name: 'field_value',
-                                    type: 'json',
-                                    default: '""',
-                                    description: 'Value to set (string/number/array/object)',
-                                },
-                            ],
-                        },
-                    ],
+                    displayName: "Custom Fields",
+                    name: "f_contact_customFields",
+                    type: "json",
+                    default: "={{ [ \n{ \n\t id : YOUR_ID, \n\t field_value : YOUR_VALUE \n}, \n] }}",
+                    description: "Array of objects: [{ id: 'CUSTOM_FIELD_ID', value: '...' }]. You can use expressions here.",
                     routing: {
-                        send: { type: 'body', property: '__customFieldsUi', preSend: [preSendCustomField], },
+                        send: { type: "body", property: "customFields", },
                     },
                 },
             ],

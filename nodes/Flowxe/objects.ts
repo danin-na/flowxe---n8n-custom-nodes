@@ -1,100 +1,5 @@
 import type { INodeProperties } from "n8n-workflow"
-import type { IExecuteSingleFunctions, IHttpRequestOptions } from 'n8n-workflow'
-
-/*
-const f = {
-
-  task: {
-    id: {
-      displayName: "Task ID",
-      name: "f_task_id",
-      type: "string",
-      default: "",
-      required: true,
-      description: "The ID of the task",
-    } as INodeProperties,
-    title: {
-      displayName: "Title",
-      name: "f_task_title",
-      type: "string",
-      default: "",
-      required: true,
-      description: "The title of the task",
-    } as INodeProperties,
-    body: {
-      displayName: "Body",
-      name: "f_task_body",
-      type: "string",
-      default: "",
-      description: "The description of the task",
-    } as INodeProperties,
-    dueDate: {
-      displayName: "Due Date",
-      name: "f_task_dueDate",
-      type: "dateTime",
-      default: "",
-      required: true,
-      description: "The due date of the task. Format: ISO 8601.",
-    } as INodeProperties,
-    assignedTo: {
-      displayName: "Assigned To",
-      name: "f_task_assignedTo",
-      type: "string",
-      default: "",
-      description: "The ID of the user the task is assigned to",
-    } as INodeProperties,
-    completed: {
-      displayName: "Completed",
-      name: "f_task_completed",
-      type: "boolean",
-      default: false,
-      description: "Whether the task is completed",
-    } as INodeProperties,
-    updateFields: {
-      displayName: "Update Fields",
-      name: "f_task_updateFields",
-      type: "collection",
-      placeholder: "Add Field",
-      default: {},
-      options: [
-        {
-          displayName: "Assigned To",
-          name: "assignedTo",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Body",
-          name: "body",
-          type: "string",
-          default: "",
-        },
-        {
-          displayName: "Completed",
-          name: "completed",
-          type: "boolean",
-          default: false,
-        },
-        {
-          displayName: "Due Date",
-          name: "dueDate",
-          type: "string",
-          default: "",
-          description: "Format: ISO 8601",
-        },
-        {
-          displayName: "Title",
-          name: "title",
-          type: "string",
-          default: "",
-        },
-      ],
-    } as INodeProperties,
-  },
-
-
-}
-*/
+const resourceOptions: Array<{ name: string; value: string }> = []
 
 // ----------------------------------------------------------------------
 // Hepers - Recourse and Operation + Type
@@ -130,12 +35,6 @@ function toTitleCase(str: string)
     .replace(/\s+/g, " ")
     .trim()
 }
-function toCamelCase(str: string)
-{
-  return str
-    .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
-    .replace(/^(.)/, (c) => c.toLowerCase())
-}
 function toSafeCamelCase(str: string)
 {
   return str
@@ -144,9 +43,6 @@ function toSafeCamelCase(str: string)
     .replace(/[^a-zA-Z0-9]/g, "")
     .replace(/^(.)/, (c) => c.toLowerCase())
 }
-
-const resourceOptions: Array<{ name: string; value: string }> = []
-
 function createResource(): INodeProperties
 {
   return {
@@ -223,22 +119,6 @@ function createOperation(name: string, definitions: Operation[])
 
   return { operation, fields }
 }
-async function preSendCustomField(
-  this: IExecuteSingleFunctions,
-  requestOptions: IHttpRequestOptions,
-): Promise<IHttpRequestOptions>
-{
-  const b: any = requestOptions.body ??= {}
-
-  const rows = b.__customFieldsUi?.customFieldValues
-  b.customFields = Array.isArray(rows)
-    ? rows.filter((r: any) => r?.id).map((r: any) => ({ id: r.id, field_value: r.field_value }))
-    : b.customFields
-
-  delete b.__customFieldsUi
-  return requestOptions
-}
-
 // ----------------------------------------------------------------------
 // 3. EXPORTS
 // ----------------------------------------------------------------------
@@ -392,36 +272,13 @@ const field = {
           routing: { send: { type: "body", property: "assignedTo" } },
         },
         {
-          displayName: 'Custom Fields',
-          name: 'f_contact_customFieldsUi',
-          type: 'fixedCollection',
-          placeholder: 'Add Custom Field',
-          default: {},
-          typeOptions: { multipleValues: true }, // repeatable rows :contentReference[oaicite:2]{index=2}
-          options: [
-            {
-              name: 'customFieldValues',
-              displayName: 'Custom Field',
-              values: [
-                {
-                  displayName: 'ID',
-                  name: 'id',
-                  type: 'string',
-                  default: '',
-                  description: 'HighLevel custom field id',
-                },
-                {
-                  displayName: 'Field Value',
-                  name: 'field_value',
-                  type: 'json',
-                  default: '""',
-                  description: 'Value to set (string/number/array/object)',
-                },
-              ],
-            },
-          ],
+          displayName: "Custom Fields",
+          name: "f_contact_customFields",
+          type: "json",
+          default: "={{ [ \n{ \n\t id : YOUR_ID, \n\t field_value : YOUR_VALUE \n}, \n] }}",
+          description: "Array of objects: [{ id: 'CUSTOM_FIELD_ID', value: '...' }]. You can use expressions here.",
           routing: {
-            send: { type: 'body', property: '__customFieldsUi', preSend: [preSendCustomField], },
+            send: { type: "body", property: "customFields", },
           },
         },
       ],
@@ -1108,4 +965,3 @@ export const data = {
     },
   ]),
 }
-
