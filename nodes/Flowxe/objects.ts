@@ -2,7 +2,7 @@ import type { INodeProperties } from "n8n-workflow"
 const resourceOptions: Array<{ name: string; value: string }> = []
 
 // ----------------------------------------------------------------------
-// Hepers - Recourse and Operation + Type
+// 01. Hepers
 // ----------------------------------------------------------------------
 
 type Option = {
@@ -120,7 +120,7 @@ function createOperation(name: string, definitions: Operation[])
   return { operation, fields }
 }
 // ----------------------------------------------------------------------
-// 3. EXPORTS
+// 02. FIELDS
 // ----------------------------------------------------------------------
 
 const field = {
@@ -415,6 +415,10 @@ const field = {
     } as INodeProperties,
   },
 }
+
+// ----------------------------------------------------------------------
+// 03. EXPORTS
+// ----------------------------------------------------------------------
 
 export const data = {
   resource: createResource(),
