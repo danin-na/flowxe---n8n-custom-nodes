@@ -528,6 +528,22 @@ const field = {
       ],
       description: "Fields to update on the conversation",
     } as INodeProperties,
+    limit: {
+      displayName: "Limit",
+      name: "f_message_limit",
+      type: "number",
+      default: 20,
+      description: "Number of messages to be fetched from the conversation. Default limit is 20",
+      routing: { send: { type: "query", property: "limit" } },
+    } as INodeProperties,
+    filterType: {
+      displayName: "Message Type Filter",
+      name: "f_message_filterType",
+      type: "string",
+      default: "",
+      description: "Types of messages to fetch separated with comma (e.g. TYPE_SMS,TYPE_CALL). Possible values: TYPE_CALL, TYPE_SMS, TYPE_EMAIL, TYPE_FACEBOOK, TYPE_GMB, TYPE_INSTAGRAM, TYPE_WHATSAPP, TYPE_ACTIVITY_APPOINTMENT, TYPE_ACTIVITY_CONTACT, TYPE_ACTIVITY_INVOICE, TYPE_ACTIVITY_PAYMENT, TYPE_ACTIVITY_OPPORTUNITY, TYPE_LIVE_CHAT, TYPE_INTERNAL_COMMENTS, TYPE_ACTIVITY_EMPLOYEE_ACTION_LOG",
+      routing: { send: { type: "query", property: "type" } },
+    } as INodeProperties,
   },
   opportunity: {
     id: {
@@ -1406,6 +1422,37 @@ export const data = {
         { ...field.message.fromNumber, required: true },
         { ...field.message.toNumber, required: true },
         field.message.extraFields
+      ],
+    },
+    { // message.getMessages
+      option: {
+        name: "get many",
+        description: "Get many Messages by conversationId",
+      },
+      action: {
+        method: "GET",
+        url: "=/conversations/{{$parameter.f_conversation_id}}/messages",
+      },
+      output: {
+        name: "messages",
+        extract: "messages.messages",
+        simpleTemplate: `data.map((item) => ({
+          id: item.id ?? null,
+          messageType: item.messageType ?? null,
+          body: item.body ?? null,
+          direction: item.direction ?? null,
+          status: item.status ?? null,
+          dateAdded: item.dateAdded ?? null,
+          from: item.from ?? null,
+          to: item.to ?? null,
+      }))`,
+      },
+      fields: [
+        field.common.responseFormat,
+        field.common.apiKey,
+        field.conversation.id,
+        field.message.limit,
+        field.message.filterType,
       ],
     },
   ]),
