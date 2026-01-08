@@ -42,6 +42,9 @@ export class Flowxe implements INodeType
 			// customField
 			data.customField.operation,
 			...data.customField.fields,
+			// customValue
+			data.customValue.operation,
+			...data.customValue.fields,
 			// tag
 			data.tag.operation,
 			...data.tag.fields,
@@ -60,6 +63,9 @@ export class Flowxe implements INodeType
 			// opportunity
 			data.opportunity.operation,
 			...data.opportunity.fields,
+			// user
+			data.user.operation,
+			...data.user.fields
 		],
 	};
 }

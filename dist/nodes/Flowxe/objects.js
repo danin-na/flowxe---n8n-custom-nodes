@@ -265,6 +265,34 @@ const field = {
             description: "Model of the custom field you want to retrieve",
         },
     },
+    customValue: {
+        id: {
+            displayName: "Custom Value ID",
+            name: "f_customValue_id",
+            type: "string",
+            default: "",
+            required: true,
+            description: "HighLevel Custom Value ID",
+        },
+        name: {
+            displayName: "Name",
+            name: "f_customValue_name",
+            type: "string",
+            default: "",
+            required: true,
+            description: "The name of the custom value",
+            routing: { send: { type: "body", property: "name" } },
+        },
+        value: {
+            displayName: "Value",
+            name: "f_customValue_value",
+            type: "string",
+            default: "",
+            required: true,
+            description: "The value of the custom value",
+            routing: { send: { type: "body", property: "value" } },
+        },
+    },
     tag: {
         id: {
             displayName: "Tag ID",
@@ -661,6 +689,16 @@ const field = {
             description: "Fields to update on the opportunity",
         },
     },
+    user: {
+        id: {
+            displayName: "User ID",
+            name: "f_user_id",
+            type: "string",
+            default: "",
+            required: true,
+            description: "HighLevel User ID",
+        },
+    },
 };
 exports.data = {
     resource: createResource(),
@@ -832,6 +870,131 @@ exports.data = {
                 field.common.apiKey,
                 field.location.id,
                 field.customField.mode,
+            ],
+        },
+    ]),
+    customValue: createOperation("customValue", [
+        {
+            option: {
+                name: "get many",
+                description: "Get many Custom Values by locationId",
+            },
+            action: {
+                method: "GET",
+                url: "=/locations/{{$parameter.f_location_id}}/customValues",
+            },
+            output: {
+                name: "customValue",
+                extract: "customValues",
+                simpleTemplate: `data.map((item) => ({
+          id    : item.id ?? null,
+          name  : item.name ?? null,
+          value : item.value ?? null,
+      }))`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.location.id,
+            ],
+        },
+        {
+            option: {
+                name: "get",
+                description: "Get a Custom Value by locationId and customValueId",
+            },
+            action: {
+                method: "GET",
+                url: "=/locations/{{$parameter.f_location_id}}/customValues/{{$parameter.f_customValue_id}}",
+            },
+            output: {
+                name: "customValue",
+                extract: "customValue",
+                simpleTemplate: `({
+          id    : data.id ?? null,
+          name  : data.name ?? null,
+          value : data.value ?? null,
+      })`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.location.id,
+                field.customValue.id,
+            ],
+        },
+        {
+            option: {
+                name: "create",
+                description: "Create a Custom Value by locationId",
+            },
+            action: {
+                method: "POST",
+                url: "=/locations/{{$parameter.f_location_id}}/customValues",
+            },
+            output: {
+                name: "customValue",
+                extract: "customValue",
+                simpleTemplate: `({
+          id    : data.id ?? null,
+          name  : data.name ?? null,
+          value : data.value ?? null,
+      })`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.location.id,
+                field.customValue.name,
+                field.customValue.value,
+            ],
+        },
+        {
+            option: {
+                name: "update",
+                description: "Update a Custom Value by locationId and customValueId",
+            },
+            action: {
+                method: "PUT",
+                url: "=/locations/{{$parameter.f_location_id}}/customValues/{{$parameter.f_customValue_id}}",
+            },
+            output: {
+                name: "customValue",
+                extract: "customValue",
+                simpleTemplate: `({
+          id    : data.id ?? null,
+          name  : data.name ?? null,
+          value : data.value ?? null,
+      })`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.location.id,
+                field.customValue.id,
+                field.customValue.name,
+                field.customValue.value,
+            ],
+        },
+        {
+            option: {
+                name: "delete",
+                description: "Delete a Custom Value by locationId and customValueId",
+            },
+            action: {
+                method: "DELETE",
+                url: "=/locations/{{$parameter.f_location_id}}/customValues/{{$parameter.f_customValue_id}}",
+            },
+            output: {
+                name: "success",
+                extract: "succeded",
+                simpleTemplate: `data`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.location.id,
+                field.customValue.id,
             ],
         },
     ]),
@@ -1555,6 +1718,67 @@ exports.data = {
                 field.common.responseFormat,
                 field.common.apiKey,
                 field.opportunity.id,
+            ],
+        },
+    ]),
+    user: createOperation("user", [
+        {
+            option: {
+                name: "get many",
+                description: "Get many Users by locationId",
+            },
+            action: {
+                method: "GET",
+                url: "/users/",
+                qs: {
+                    locationId: "={{$parameter.f_location_id}}",
+                },
+            },
+            output: {
+                name: "user",
+                extract: "users",
+                simpleTemplate: `data.map((item) => ({
+          id        : item.id ?? null,
+          name      : item.name ?? null,
+          firstName : item.firstName ?? null,
+          lastName  : item.lastName ?? null,
+          email     : item.email ?? null,
+          phone     : item.phone ?? null,
+          role      : item.roles ?? null,
+      }))`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.location.id,
+            ],
+        },
+        {
+            option: {
+                name: "get",
+                description: "Get a User by userId",
+            },
+            action: {
+                method: "GET",
+                url: "=/users/{{$parameter.f_user_id}}",
+            },
+            output: {
+                name: "user",
+                extract: "user",
+                simpleTemplate: `({
+          id        : data.id ?? null,
+          name      : data.name ?? null,
+          firstName : data.firstName ?? null,
+          lastName  : data.lastName ?? null,
+          email     : data.email ?? null,
+          phone     : data.phone ?? null,
+          role      : data.role ?? null,
+      })`,
+            },
+            fields: [
+                field.common.responseFormat,
+                field.common.apiKey,
+                field.user.id,
             ],
         },
     ]),

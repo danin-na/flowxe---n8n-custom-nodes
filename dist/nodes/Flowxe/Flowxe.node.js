@@ -36,6 +36,8 @@ class Flowxe {
                 ...objects_1.data.pipeline.fields,
                 objects_1.data.customField.operation,
                 ...objects_1.data.customField.fields,
+                objects_1.data.customValue.operation,
+                ...objects_1.data.customValue.fields,
                 objects_1.data.tag.operation,
                 ...objects_1.data.tag.fields,
                 objects_1.data.note.operation,
@@ -48,6 +50,8 @@ class Flowxe {
                 ...objects_1.data.message.fields,
                 objects_1.data.opportunity.operation,
                 ...objects_1.data.opportunity.fields,
+                objects_1.data.user.operation,
+                ...objects_1.data.user.fields
             ],
         };
     }
